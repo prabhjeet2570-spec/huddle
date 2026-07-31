@@ -78,3 +78,14 @@ def create_booking(request: BookingRequest) -> Booking:
         _bookings.append(booking)
 
     return booking
+
+
+@router.get("/{booking_id}", response_model=Booking)
+def get_booking(booking_id: UUID) -> Booking:
+    """Retrieve a reservation by the reference returned when it was created."""
+    with _booking_lock:
+        for booking in _bookings:
+            if booking.id == booking_id:
+                return booking
+
+    raise HTTPException(status_code=404, detail="Booking not found")
