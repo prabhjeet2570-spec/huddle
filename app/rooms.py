@@ -2,7 +2,7 @@
 
 from typing import Annotated
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel, ConfigDict, Field
 
 
@@ -33,3 +33,12 @@ def list_rooms(
         for room in ROOMS
         if min_capacity is None or room.capacity >= min_capacity
     ]
+
+
+@router.get("/{room_id}", response_model=Room)
+def get_room(room_id: str) -> Room:
+    """Look up a room by its exact catalog ID."""
+    for room in ROOMS:
+        if room.id == room_id:
+            return room
+    raise HTTPException(status_code=404, detail="Room not found")

@@ -6,12 +6,12 @@ import pytest
 from app.main import app
 
 
-def get_rooms(query=""):
+def get_rooms(suffix=""):
     async def request():
         async with httpx.AsyncClient(
             transport=httpx.ASGITransport(app=app), base_url="http://test"
         ) as client:
-            return await client.get(f"/rooms{query}")
+            return await client.get(f"/rooms{suffix}")
 
     return asyncio.run(request())
 
@@ -49,3 +49,21 @@ def test_invalid_capacity_is_rejected(capacity):
 
     assert response.status_code == 422
     assert response.json()["detail"][0]["loc"] == ["query", "min_capacity"]
+
+
+def test_each_catalog_room_can_be_looked_up():
+    catalog = get_rooms().json()
+
+    for room in catalog:
+        response = get_rooms(f"/{room['id']}")
+
+        assert response.status_code == 200
+        assert response.json() == room
+
+
+@pytest.mark.parametrize("room_id", ["missing", "Cedar", "ced"])
+def test_unknown_room_returns_not_found(room_id):
+    response = get_rooms(f"/{room_id}")
+
+    assert response.status_code == 404
+    assert response.json() == {"detail": "Room not found"}
