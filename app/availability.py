@@ -5,7 +5,7 @@ from typing import Annotated
 from fastapi import APIRouter, Query
 from pydantic import Field
 
-from app.bookings import Booking, TimeWindow, occupied_bookings
+from app.bookings import TimeWindow, occupied_bookings
 from app.rooms import ROOMS, Room, get_room
 
 router = APIRouter(tags=["availability"])
@@ -21,7 +21,7 @@ class AvailabilityResult(TimeWindow):
 
 class RoomSchedule(TimeWindow):
     room: Room
-    bookings: list[Booking]
+    bookings: list[TimeWindow]
     free_windows: list[TimeWindow]
 
 
@@ -43,9 +43,7 @@ def search_availability(
 
 
 @router.get("/rooms/{room_id}/schedule", response_model=RoomSchedule)
-def room_schedule(
-    room_id: str, window: Annotated[TimeWindow, Query()]
-) -> RoomSchedule:
+def room_schedule(room_id: str, window: Annotated[TimeWindow, Query()]) -> RoomSchedule:
     """Return intersecting bookings and free intervals within the requested window."""
     room = get_room(room_id)
     bookings = occupied_bookings(window, room_id)
@@ -59,5 +57,8 @@ def room_schedule(
     if cursor < window.ends_at:
         free_windows.append(TimeWindow(starts_at=cursor, ends_at=window.ends_at))
     return RoomSchedule(
-        **window.model_dump(), room=room, bookings=bookings, free_windows=free_windows
+        **window.model_dump(),
+        room=room,
+        bookings=[TimeWindow(starts_at=b.starts_at, ends_at=b.ends_at) for b in bookings],
+        free_windows=free_windows,
     )

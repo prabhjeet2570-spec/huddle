@@ -28,11 +28,7 @@ def list_rooms(
     min_capacity: Annotated[int | None, Query(ge=1)] = None,
 ) -> list[Room]:
     """List rooms by capacity; this does not check booking availability."""
-    return [
-        room
-        for room in ROOMS
-        if min_capacity is None or room.capacity >= min_capacity
-    ]
+    return [room for room in ROOMS if min_capacity is None or room.capacity >= min_capacity]
 
 
 @router.get("/{room_id}", response_model=Room)
