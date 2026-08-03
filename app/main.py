@@ -4,11 +4,13 @@ from fastapi import Depends, FastAPI
 
 from app.availability import router as availability_router
 from app.bookings import router as bookings_router
+from app.operations import router as operations_router
 from app.rooms import router as rooms_router
 from app.session import current_user
 from app.session import router as session_router
 
 app = FastAPI(title="Huddle", version="0.1.0")
+app.include_router(operations_router)
 app.include_router(session_router)
 app.include_router(rooms_router)
 app.include_router(bookings_router)
