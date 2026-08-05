@@ -1,6 +1,10 @@
 """Huddle's HTTP application."""
 
-from fastapi import Depends, FastAPI
+from pathlib import Path
+
+from fastapi import Depends, FastAPI, Request
+from fastapi.responses import FileResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
 
 from app.assistant import router as assistant_router
 from app.availability import router as availability_router
@@ -28,3 +32,25 @@ def health() -> dict[str, str]:
 @app.get("/session")
 def session(user=Depends(current_user)):
     return user
+
+
+static_dir = Path(__file__).parent / "static"
+app.mount("/static", StaticFiles(directory=static_dir), name="static")
+
+
+@app.get("/", include_in_schema=False)
+def home():
+    return FileResponse(static_dir / "index.html")
+
+
+@app.middleware("http")
+async def same_origin_writes(request: Request, call_next):
+    origin = request.headers.get("origin")
+    if request.method not in ("GET", "HEAD", "OPTIONS") and origin:
+        if origin != str(request.base_url).rstrip("/"):
+            return JSONResponse({"detail": "Cross-origin writes are not allowed"}, status_code=403)
+    response = await call_next(request)
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["Referrer-Policy"] = "same-origin"
+    return response
