@@ -1,29 +1,501 @@
-const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
-const state={page:'discover',rooms:[],bookings:[],filter:'confirmed',editing:null,cancelling:null,proposal:null,user:null,requestKey:null};
-const escapeHTML=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const timezone=Intl.DateTimeFormat().resolvedOptions().timeZone;
-const dt=v=>new Date(v).toLocaleString(undefined,{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
-const tm=v=>new Date(v).toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'});
-const local=v=>{const d=new Date(v);return new Date(d-d.getTimezoneOffset()*60000).toISOString().slice(0,16)};
+const $ = (s) => document.querySelector(s),
+  $$ = (s) => [...document.querySelectorAll(s)];
+const state = {
+  page: "discover",
+  rooms: [],
+  bookings: [],
+  filter: "confirmed",
+  editing: null,
+  cancelling: null,
+  proposal: null,
+  user: null,
+  requestKey: null,
+};
+const escapeHTML = (v) =>
+  String(v ?? "").replace(
+    /[&<>"']/g,
+    (c) =>
+      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[
+        c
+      ],
+  );
+const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+const dt = (v) =>
+  new Date(v).toLocaleString(undefined, {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+const tm = (v) =>
+  new Date(v).toLocaleTimeString(undefined, {
+    hour: "numeric",
+    minute: "2-digit",
+  });
+const local = (v) => {
+  const d = new Date(v);
+  return new Date(d - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+};
 let toastTimer;
-function toast(message){$('#toast').textContent=message;$('#toast').classList.remove('hidden');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('#toast').classList.add('hidden'),6000)}
-async function api(path,options={}){const response=await fetch(path,{...options,headers:{'Content-Type':'application/json',...options.headers}});let body;try{body=await response.json()}catch{throw Error('The server returned an unreadable response.')}if(!response.ok){if(response.status===401&&!$('#session-dialog').open)$('#session-dialog').showModal();const detail=body.detail;throw Error(typeof detail==='string'?detail:Array.isArray(detail)?detail.map(e=>e.msg).join('; '):'Request failed')}return body}
-function page(name){state.page=name;$$('.page').forEach(el=>el.classList.toggle('hidden',el.id!==name));$$('.nav').forEach(el=>el.classList.toggle('active',el.dataset.page===name));$('#page-title').textContent={discover:'Find a room',bookings:'My bookings',assistant:'Huddle assistant',reliability:'Reliability'}[name];if(name==='bookings')loadBookings();if(name==='assistant')loadAssistant();if(name==='reliability')loadMetrics();history.replaceState(null,'','#'+name)}
-function queryWindow(){const day=$('#search-date').value;const start=new Date(day+'T'+$('#search-start').value),end=new Date(day+'T'+$('#search-end').value);if(!Number.isFinite(+start)||!Number.isFinite(+end)||end<=start)throw Error('Choose an end time after the start.');return {starts_at:start.toISOString(),ends_at:end.toISOString(),min_capacity:$('#search-people').value}}
-const roomInfo={cedar:{sub:'A quiet corner for focused conversations.',features:['▧ Whiteboard','◉ Display','☀ Daylight'],floor:'Ground floor · East wing'},maple:{sub:'Bring the team. Leave with a plan.',features:['▧ Whiteboard','◉ Video calls','☀ Daylight'],floor:'First floor · North wing'},birch:{sub:'Big ideas deserve a little more room.',features:['◉ Large display','◎ Conference','☀ Daylight'],floor:'First floor · West wing'}};
-function renderRooms(available){$('#room-count').textContent=state.rooms.length;$('#rooms').innerHTML=state.rooms.map(room=>{const info=roomInfo[room.id],free=available?.has(room.id);return `<article class="room-card"><div class="room-image"><img src="/static/${escapeHTML(room.id)}.svg" alt="Illustration of the ${escapeHTML(room.name)} meeting room"><span class="badge ${free===false?'pending':''}">${free===undefined?'Explore this space':free?'● Available':'Unavailable for this time'}</span></div><div class="room-body"><div class="room-title"><h3>${escapeHTML(room.name)}</h3><span>♙ &nbsp; Up to ${room.capacity}</span></div><p class="room-description">${info.sub}</p><div class="room-features">${info.features.map(f=>`<span>${f}</span>`).join('')}</div><div class="room-bottom"><span>${info.floor}</span><button data-book="${room.id}" ${free===false?'disabled':''}>Book space ↗</button></div></div></article>`}).join('')}
-async function search(){try{const q=queryWindow(),data=await api('/availability?'+new URLSearchParams(q));renderRooms(new Set(data.rooms.map(r=>r.id)));$('#search-caption').textContent=`${data.rooms.length} spaces available · ${dt(q.starts_at)} – ${tm(q.ends_at)}`;}catch(e){toast(e.message)}}
-async function loadBookings(){try{state.bookings=await api('/bookings?limit=100');$('#booking-count').textContent=state.bookings.filter(b=>b.status==='confirmed').length;renderBookings()}catch(e){$('#booking-list').innerHTML=`<div class="error-state">${escapeHTML(e.message)}</div>`}}
-function renderBookings(){const bookings=state.bookings.filter(b=>b.status===state.filter);$('#booking-list').innerHTML=bookings.length?bookings.map(b=>{const d=new Date(b.starts_at),future=d>new Date();return `<article class="booking-card"><div class="date-box"><small>${d.toLocaleDateString(undefined,{month:'short'})}</small><b>${d.getDate()}</b></div><div class="booking-content"><h3>${escapeHTML(b.title)}</h3><div class="booking-meta">${escapeHTML(b.room_id[0].toUpperCase()+b.room_id.slice(1))} &nbsp;·&nbsp; ${tm(b.starts_at)} – ${tm(b.ends_at)} &nbsp;·&nbsp; ${b.attendees} people</div><div class="booking-badges"><span class="badge ${b.status==='cancelled'?'cancelled':''}">${b.status==='cancelled'?'Cancelled':future?'Confirmed':'Past booking'}</span><span class="badge ${b.calendar_status==='synced'?'neutral':'pending'}">${{pending:'Calendar pending',synced:'Calendar synced',needs_review:'Sync needs review'}[b.calendar_status]}</span></div><div id="events-${b.id}" class="hidden history-inline"></div></div><div class="booking-actions"><button class="button secondary" data-events="${b.id}">Activity</button>${b.calendar_status==='needs_review'?`<button class="button secondary" data-retry="${b.id}">Retry sync</button>`:''}${b.status==='confirmed'&&future?`<button class="button secondary" data-edit="${b.id}">Edit</button><button class="button secondary" data-cancel="${b.id}">Cancel</button>`:''}</div></article>`}).join(''):`<div class="empty-state"><span class="empty-symbol">▦</span><h3>${state.filter==='cancelled'?'A clean slate.':'Your next meeting is waiting.'}</h3><p>${state.filter==='cancelled'?'Cancelled bookings will appear here.':'Find a room and make a little space for your team.'}</p><button class="button primary" data-page="discover">Explore rooms →</button></div>`}
-function openBooking(roomId,booking=null){state.editing=booking;state.requestKey=crypto.randomUUID();$('#dialog-title').textContent=booking?'Make a little change.':'Book your space';$('#save-booking').textContent=booking?'Save changes →':'Confirm booking →';$('#meeting-title').value=booking?.title||'Team catch-up';$('#meeting-room').value=booking?.room_id||roomId;let q;try{q=queryWindow()}catch{return toast('Choose a valid time first.')}$('#meeting-start').value=local(booking?.starts_at||q.starts_at);$('#meeting-end').value=local(booking?.ends_at||q.ends_at);$('#meeting-attendees').value=booking?.attendees||Math.min(Number(q.min_capacity)||2,state.rooms.find(r=>r.id===roomId)?.capacity||4);$('#booking-error').textContent='';$('#booking-dialog').showModal()}
-async function saveBooking(event){event.preventDefault();const button=$('#save-booking');button.disabled=true;try{const payload={title:$('#meeting-title').value.trim(),room_id:$('#meeting-room').value,starts_at:new Date($('#meeting-start').value).toISOString(),ends_at:new Date($('#meeting-end').value).toISOString(),attendees:Number($('#meeting-attendees').value)};if(payload.ends_at<=payload.starts_at)throw Error('End time must be after start.');await api(state.editing?'/bookings/'+state.editing.id:'/bookings',{method:state.editing?'PUT':'POST',headers:state.editing?{'If-Match':String(state.editing.version)}:{'Idempotency-Key':state.requestKey},body:JSON.stringify(payload)});$('#booking-dialog').close();toast(state.editing?'Booking updated. Previous slot released.':'Room booked. You’re all set.');await loadBookings();page('bookings');}catch(e){$('#booking-error').textContent=e.message}finally{button.disabled=false}}
-async function cancelBooking(){const b=state.cancelling;$('#confirm-cancel').disabled=true;try{await api('/bookings/'+b.id+'/cancel',{method:'POST',headers:{'If-Match':String(b.version)}});$('#confirm-dialog').close();toast('Booking cancelled. The room is available again.');await loadBookings()}catch(e){toast(e.message)}finally{$('#confirm-cancel').disabled=false}}
-function renderMessages(messages){$('#chat-messages').innerHTML=messages.length?messages.map(m=>`<div class="message ${m.role==='user'?'user':'assistant'}">${escapeHTML(m.content)}</div>`).join(''):'<div class="message assistant">Hi! Tell me when you’re meeting and how many people are coming. I’ll help you find the right space.</div>';$('#chat-messages').scrollTop=$('#chat-messages').scrollHeight}
-function renderProposal(p){state.proposal=p;$('#proposal').innerHTML=p?`<div class="proposal-card"><p class="eyebrow">YOUR APPROVAL REQUIRED</p><h3>${escapeHTML(p.arguments.title)}</h3><p>${escapeHTML(p.arguments.room_id)} · ${p.arguments.attendees} people<br>${dt(p.arguments.starts_at)} – ${tm(p.arguments.ends_at)}<br><small>Expires ${tm(p.expires_at)}. A new message replaces this proposal.</small></p><button class="button primary" id="approve-proposal">Approve & book</button><button class="button secondary" id="dismiss-proposal">Dismiss</button></div>`:''}
-async function loadAssistant(){try{const status=await api('/assistant/status');$('#model-status').textContent=status.configured?'Connected · '+status.model:'API key not configured';const h=await api('/assistant/history');renderMessages(h.messages);renderProposal(h.proposal)}catch(e){toast(e.message)}}
-async function chat(event){event.preventDefault();const input=$('#chat-input'),message=input.value.trim();if(!message)return;input.value='';$('#chat-form button').disabled=true;renderProposal(null);$('#chat-messages').insertAdjacentHTML('beforeend',`<div class="message user">${escapeHTML(message)}</div><div class="message assistant loading" id="thinking">Finding a little clarity…</div>`);$('#chat-messages').scrollTop=$('#chat-messages').scrollHeight;try{const result=await api('/assistant/chat',{method:'POST',body:JSON.stringify({message,timezone})});$('#thinking')?.remove();$('#chat-messages').insertAdjacentHTML('beforeend',`<div class="message assistant">${escapeHTML(result.message)}</div>`);renderProposal(result.proposal)}catch(e){$('#thinking')?.remove();$('#chat-messages').insertAdjacentHTML('beforeend',`<div class="message assistant">${escapeHTML(e.message)}</div>`)}finally{$('#chat-form button').disabled=false;$('#chat-messages').scrollTop=$('#chat-messages').scrollHeight}}
-async function loadMetrics(){try{const m=await api('/metrics');$('#worker-status').textContent=m.worker?.online?'● Calendar worker online':'Calendar worker offline';$('#worker-status').className='badge '+(m.worker?.online?'':'pending');const cards=[['Confirmed bookings',m.confirmed,'Current room allocations'],['Calendar synchronized',m.synced,'Across confirmed & cancelled bookings'],['Awaiting sync',m.pending,`${m.needs_review} requiring review`],['Sync latency · p95',m.sync_p95_seconds===null?'—':Number(m.sync_p95_seconds).toFixed(1)+'s',`${m.jobs} jobs · ${m.retried} retried`]];$('#metrics').innerHTML=cards.map(([label,value,note])=>`<div class="metric"><span class="label">${label}</span><strong>${value}</strong><small>${note}</small></div>`).join('');$('#activity').innerHTML=m.history.length?m.history.map(h=>`<div class="activity-item"><span class="event-dot">${h.kind==='calendar_synced'?'✓':h.kind.includes('retry')?'↻':'·'}</span><div><b>${escapeHTML(h.title)} · ${escapeHTML(h.kind.replaceAll('_',' '))}</b><p>${escapeHTML(h.detail)}</p><small>${dt(h.created_at)} · ${escapeHTML(h.room_id)}</small></div></div>`).join(''):'<div class="empty-state"><h3>Every booking tells a story.</h3><p>Make a reservation to see its workflow here.</p></div>'}catch(e){toast(e.message)}}
-async function actions(event){const target=event.target.closest('button');if(!target)return;try{if(target.dataset.page)page(target.dataset.page);if(target.dataset.close)$('#'+target.dataset.close).close();if(target.dataset.book)openBooking(target.dataset.book);if(target.dataset.filter){state.filter=target.dataset.filter;$$('.tab').forEach(t=>t.classList.toggle('active',t===target));renderBookings()}if(target.dataset.edit)openBooking(null,state.bookings.find(b=>b.id===target.dataset.edit));if(target.dataset.cancel){state.cancelling=state.bookings.find(b=>b.id===target.dataset.cancel);$('#cancel-summary').textContent=state.cancelling.title+' · '+dt(state.cancelling.starts_at);$('#confirm-dialog').showModal()}if(target.dataset.events){const el=$('#events-'+target.dataset.events);el.classList.toggle('hidden');if(!el.classList.contains('hidden')){const events=await api('/bookings/'+target.dataset.events+'/events');el.innerHTML=events.map(e=>`<p>${escapeHTML(e.detail)}<br><small>${dt(e.created_at)}</small></p>`).join('')}}if(target.dataset.retry){await api('/bookings/'+target.dataset.retry+'/retry-sync',{method:'POST'});toast('Calendar retry queued.');loadBookings()}if(target.classList.contains('suggestion')){$('#chat-input').value=target.textContent;$('#chat-input').focus()}if(target.id==='approve-proposal'){target.disabled=true;await api('/assistant/proposals/'+state.proposal.id+'/approve',{method:'POST'});renderProposal(null);toast('Approved. Your room is booked.');loadBookings();page('bookings')}if(target.id==='dismiss-proposal'){await api('/assistant/proposals/'+state.proposal.id,{method:'DELETE'});renderProposal(null)}}catch(e){target.disabled=false;toast(e.message)}}
-function setUser(user){state.user=user;$('#user-name').textContent=user.name;$('#avatar').textContent=user.name[0].toUpperCase();$('#greeting').textContent=`A little room for good work, ${user.name}.`}
-async function init(){const tomorrow=new Date();tomorrow.setDate(tomorrow.getDate()+1);$('#search-date').value=local(tomorrow).slice(0,10);$('#local-time').textContent=new Date().toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'});$$('.timezone').forEach(e=>e.textContent=timezone.replaceAll('_',' '));document.addEventListener('click',actions);$('#search-form').addEventListener('submit',e=>{e.preventDefault();search()});$('#booking-form').addEventListener('submit',saveBooking);$('#booking-form').addEventListener('input',()=>state.requestKey=crypto.randomUUID());$('#confirm-cancel').addEventListener('click',cancelBooking);$('#chat-form').addEventListener('submit',chat);$('#ask-assistant').onclick=()=>page('assistant');$('#profile').onclick=()=>toast('Your private demo session lasts 7 days. Use another browser profile for a separate workspace.');$('#session-form').onsubmit=async e=>{e.preventDefault();try{const user=await api('/session',{method:'POST',body:JSON.stringify({name:$('#display-name').value})});setUser(user);$('#session-dialog').close();loadBookings();}catch(err){toast(err.message)}};try{state.rooms=await api('/rooms');renderRooms();await search();setUser(await api('/session'));await loadBookings();}catch(e){if(!$('#session-dialog').open)toast(e.message)}const route=location.hash.slice(1);if(['discover','bookings','assistant','reliability'].includes(route))page(route);setInterval(()=>{if(state.user&&state.page==='reliability')loadMetrics()},10000)}
+function toast(message) {
+  $("#toast").textContent = message;
+  $("#toast").classList.remove("hidden");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => $("#toast").classList.add("hidden"), 6000);
+}
+async function api(path, options = {}) {
+  const response = await fetch(path, {
+    ...options,
+    headers: { "Content-Type": "application/json", ...options.headers },
+  });
+  let body;
+  try {
+    body = await response.json();
+  } catch {
+    throw Error("The server returned an unreadable response.");
+  }
+  if (!response.ok) {
+    if (response.status === 401 && !$("#session-dialog").open)
+      $("#session-dialog").showModal();
+    const detail = body.detail;
+    throw Error(
+      typeof detail === "string"
+        ? detail
+        : Array.isArray(detail)
+          ? detail.map((e) => e.msg).join("; ")
+          : "Request failed",
+    );
+  }
+  return body;
+}
+function page(name) {
+  state.page = name;
+  $$(".page").forEach((el) => el.classList.toggle("hidden", el.id !== name));
+  $$(".nav").forEach((el) =>
+    el.classList.toggle("active", el.dataset.page === name),
+  );
+  $("#page-title").textContent = {
+    discover: "Find a room",
+    bookings: "My bookings",
+    assistant: "Huddle assistant",
+    reliability: "Reliability",
+  }[name];
+  if (name === "discover") search();
+  if (name === "bookings") loadBookings();
+  if (name === "assistant") loadAssistant();
+  if (name === "reliability") loadMetrics();
+  history.replaceState(null, "", "#" + name);
+}
+function queryWindow() {
+  const day = $("#search-date").value;
+  const start = new Date(day + "T" + $("#search-start").value),
+    end = new Date(day + "T" + $("#search-end").value);
+  if (!Number.isFinite(+start) || !Number.isFinite(+end) || end <= start)
+    throw Error("Choose an end time after the start.");
+  return {
+    starts_at: start.toISOString(),
+    ends_at: end.toISOString(),
+    min_capacity: $("#search-people").value,
+  };
+}
+const roomInfo = {
+  cedar: {
+    sub: "A quiet corner for focused conversations.",
+    features: ["▧ Whiteboard", "◉ Display", "☀ Daylight"],
+    floor: "Ground floor · East wing",
+  },
+  maple: {
+    sub: "Bring the team. Leave with a plan.",
+    features: ["▧ Whiteboard", "◉ Video calls", "☀ Daylight"],
+    floor: "First floor · North wing",
+  },
+  birch: {
+    sub: "Big ideas deserve a little more room.",
+    features: ["◉ Large display", "◎ Conference", "☀ Daylight"],
+    floor: "First floor · West wing",
+  },
+};
+function renderRooms(available) {
+  $("#room-count").textContent = state.rooms.length;
+  $("#rooms").innerHTML = state.rooms
+    .map((room) => {
+      const info = roomInfo[room.id],
+        free = available?.has(room.id);
+      return `<article class="room-card"><div class="room-image"><img src="/static/${escapeHTML(room.id)}.svg" alt="Illustration of the ${escapeHTML(room.name)} meeting room"><span class="badge ${free === false ? "pending" : ""}">${free === undefined ? "Explore this space" : free ? "● Available" : "Unavailable for this time"}</span></div><div class="room-body"><div class="room-title"><h3>${escapeHTML(room.name)}</h3><span>♙ &nbsp; Up to ${room.capacity}</span></div><p class="room-description">${info.sub}</p><div class="room-features">${info.features.map((f) => `<span>${f}</span>`).join("")}</div><div class="room-bottom"><span>${info.floor}</span><button data-book="${room.id}" ${free === false ? "disabled" : ""}>Book space ↗</button></div></div></article>`;
+    })
+    .join("");
+}
+async function search() {
+  try {
+    const q = queryWindow(),
+      data = await api("/availability?" + new URLSearchParams(q));
+    renderRooms(new Set(data.rooms.map((r) => r.id)));
+    $("#search-caption").textContent =
+      `${data.rooms.length} spaces available · ${dt(q.starts_at)} – ${tm(q.ends_at)}`;
+  } catch (e) {
+    toast(e.message);
+  }
+}
+async function loadBookings() {
+  try {
+    state.bookings = await api("/bookings?limit=100");
+    $("#booking-count").textContent = state.bookings.filter(
+      (b) => b.status === "confirmed",
+    ).length;
+    renderBookings();
+  } catch (e) {
+    $("#booking-list").innerHTML =
+      `<div class="error-state">${escapeHTML(e.message)}</div>`;
+  }
+}
+function renderBookings() {
+  const bookings = state.bookings.filter((b) => b.status === state.filter);
+  $("#booking-list").innerHTML = bookings.length
+    ? bookings
+        .map((b) => {
+          const d = new Date(b.starts_at),
+            future = d > new Date();
+          return `<article class="booking-card"><div class="date-box"><small>${d.toLocaleDateString(undefined, { month: "short" })}</small><b>${d.getDate()}</b></div><div class="booking-content"><h3>${escapeHTML(b.title)}</h3><div class="booking-meta">${escapeHTML(b.room_id[0].toUpperCase() + b.room_id.slice(1))} &nbsp;·&nbsp; ${tm(b.starts_at)} – ${tm(b.ends_at)} &nbsp;·&nbsp; ${b.attendees} people</div><div class="booking-badges"><span class="badge ${b.status === "cancelled" ? "cancelled" : ""}">${b.status === "cancelled" ? "Cancelled" : future ? "Confirmed" : "Past booking"}</span><span class="badge ${b.calendar_status === "synced" ? "neutral" : "pending"}">${{ pending: "Calendar pending", synced: "Calendar synced", needs_review: "Sync needs review" }[b.calendar_status]}</span></div><div id="events-${b.id}" class="hidden history-inline"></div></div><div class="booking-actions"><button class="button secondary" data-events="${b.id}">Activity</button>${b.calendar_status === "needs_review" ? `<button class="button secondary" data-retry="${b.id}">Retry sync</button>` : ""}${b.status === "confirmed" && future ? `<button class="button secondary" data-edit="${b.id}">Edit</button><button class="button secondary" data-cancel="${b.id}">Cancel</button>` : ""}</div></article>`;
+        })
+        .join("")
+    : `<div class="empty-state"><span class="empty-symbol">▦</span><h3>${state.filter === "cancelled" ? "A clean slate." : "Your next meeting is waiting."}</h3><p>${state.filter === "cancelled" ? "Cancelled bookings will appear here." : "Find a room and make a little space for your team."}</p><button class="button primary" data-page="discover">Explore rooms →</button></div>`;
+}
+function openBooking(roomId, booking = null) {
+  state.editing = booking;
+  state.requestKey = crypto.randomUUID();
+  $("#dialog-title").textContent = booking
+    ? "Make a little change."
+    : "Book your space";
+  $("#save-booking").textContent = booking
+    ? "Save changes →"
+    : "Confirm booking →";
+  $("#meeting-title").value = booking?.title || "Team catch-up";
+  $("#meeting-room").value = booking?.room_id || roomId;
+  let q;
+  try {
+    q = queryWindow();
+  } catch {
+    return toast("Choose a valid time first.");
+  }
+  $("#meeting-start").value = local(booking?.starts_at || q.starts_at);
+  $("#meeting-end").value = local(booking?.ends_at || q.ends_at);
+  $("#meeting-attendees").value =
+    booking?.attendees ||
+    Math.min(
+      Number(q.min_capacity) || 2,
+      state.rooms.find((r) => r.id === roomId)?.capacity || 4,
+    );
+  $("#booking-error").textContent = "";
+  $("#booking-dialog").showModal();
+}
+async function saveBooking(event) {
+  event.preventDefault();
+  const button = $("#save-booking");
+  button.disabled = true;
+  try {
+    const payload = {
+      title: $("#meeting-title").value.trim(),
+      room_id: $("#meeting-room").value,
+      starts_at: new Date($("#meeting-start").value).toISOString(),
+      ends_at: new Date($("#meeting-end").value).toISOString(),
+      attendees: Number($("#meeting-attendees").value),
+    };
+    if (payload.ends_at <= payload.starts_at)
+      throw Error("End time must be after start.");
+    await api(state.editing ? "/bookings/" + state.editing.id : "/bookings", {
+      method: state.editing ? "PUT" : "POST",
+      headers: state.editing
+        ? { "If-Match": String(state.editing.version) }
+        : { "Idempotency-Key": state.requestKey },
+      body: JSON.stringify(payload),
+    });
+    $("#booking-dialog").close();
+    toast(
+      state.editing
+        ? "Booking updated. Previous slot released."
+        : "Room booked. You’re all set.",
+    );
+    await loadBookings();
+    page("bookings");
+  } catch (e) {
+    $("#booking-error").textContent = e.message;
+  } finally {
+    button.disabled = false;
+  }
+}
+async function cancelBooking() {
+  const b = state.cancelling;
+  $("#confirm-cancel").disabled = true;
+  try {
+    await api("/bookings/" + b.id + "/cancel", {
+      method: "POST",
+      headers: { "If-Match": String(b.version) },
+    });
+    $("#confirm-dialog").close();
+    toast("Booking cancelled. The room is available again.");
+    await loadBookings();
+  } catch (e) {
+    toast(e.message);
+  } finally {
+    $("#confirm-cancel").disabled = false;
+  }
+}
+function renderMessages(messages) {
+  $("#chat-messages").innerHTML = messages.length
+    ? messages
+        .map(
+          (m) =>
+            `<div class="message ${m.role === "user" ? "user" : "assistant"}">${escapeHTML(m.content)}</div>`,
+        )
+        .join("")
+    : '<div class="message assistant">Hi! Tell me when you’re meeting and how many people are coming. I’ll help you find the right space.</div>';
+  $("#chat-messages").scrollTop = $("#chat-messages").scrollHeight;
+}
+function renderProposal(p) {
+  state.proposal = p;
+  $("#proposal").innerHTML = p
+    ? `<div class="proposal-card"><p class="eyebrow">YOUR APPROVAL REQUIRED</p><h3>${escapeHTML(p.arguments.title)}</h3><p>${escapeHTML(p.arguments.room_id)} · ${p.arguments.attendees} people<br>${dt(p.arguments.starts_at)} – ${tm(p.arguments.ends_at)}<br><small>Expires ${tm(p.expires_at)}. A new message replaces this proposal.</small></p><button class="button primary" id="approve-proposal">Approve & book</button><button class="button secondary" id="dismiss-proposal">Dismiss</button></div>`
+    : "";
+}
+async function loadAssistant() {
+  try {
+    const status = await api("/assistant/status");
+    $("#model-status").textContent = status.configured
+      ? "Connected · " + status.model
+      : "API key not configured";
+    const h = await api("/assistant/history");
+    renderMessages(h.messages);
+    renderProposal(h.proposal);
+  } catch (e) {
+    toast(e.message);
+  }
+}
+async function chat(event) {
+  event.preventDefault();
+  const input = $("#chat-input"),
+    message = input.value.trim();
+  if (!message) return;
+  input.value = "";
+  $("#chat-form button").disabled = true;
+  renderProposal(null);
+  $("#chat-messages").insertAdjacentHTML(
+    "beforeend",
+    `<div class="message user">${escapeHTML(message)}</div><div class="message assistant loading" id="thinking">Finding a little clarity…</div>`,
+  );
+  $("#chat-messages").scrollTop = $("#chat-messages").scrollHeight;
+  try {
+    const result = await api("/assistant/chat", {
+      method: "POST",
+      body: JSON.stringify({ message, timezone }),
+    });
+    $("#thinking")?.remove();
+    $("#chat-messages").insertAdjacentHTML(
+      "beforeend",
+      `<div class="message assistant">${escapeHTML(result.message)}</div>`,
+    );
+    renderProposal(result.proposal);
+  } catch (e) {
+    $("#thinking")?.remove();
+    $("#chat-messages").insertAdjacentHTML(
+      "beforeend",
+      `<div class="message assistant">${escapeHTML(e.message)}</div>`,
+    );
+  } finally {
+    $("#chat-form button").disabled = false;
+    $("#chat-messages").scrollTop = $("#chat-messages").scrollHeight;
+  }
+}
+async function loadMetrics() {
+  try {
+    const m = await api("/metrics");
+    $("#worker-status").textContent = m.worker?.online
+      ? "● Calendar worker online"
+      : "Calendar worker offline";
+    $("#worker-status").className =
+      "badge " + (m.worker?.online ? "" : "pending");
+    const cards = [
+      ["Confirmed bookings", m.confirmed, "Current room allocations"],
+      [
+        "Calendar synchronized",
+        m.synced,
+        "Across confirmed & cancelled bookings",
+      ],
+      ["Awaiting sync", m.pending, `${m.needs_review} requiring review`],
+      [
+        "Sync latency · p95",
+        m.sync_p95_seconds === null
+          ? "—"
+          : Number(m.sync_p95_seconds).toFixed(1) + "s",
+        `${m.jobs} jobs · ${m.retried} retried`,
+      ],
+    ];
+    $("#metrics").innerHTML = cards
+      .map(
+        ([label, value, note]) =>
+          `<div class="metric"><span class="label">${label}</span><strong>${value}</strong><small>${note}</small></div>`,
+      )
+      .join("");
+    $("#activity").innerHTML = m.history.length
+      ? m.history
+          .map(
+            (h) =>
+              `<div class="activity-item"><span class="event-dot">${h.kind === "calendar_synced" ? "✓" : h.kind.includes("retry") ? "↻" : "·"}</span><div><b>${escapeHTML(h.title)} · ${escapeHTML(h.kind.replaceAll("_", " "))}</b><p>${escapeHTML(h.detail)}</p><small>${dt(h.created_at)} · ${escapeHTML(h.room_id)}</small></div></div>`,
+          )
+          .join("")
+      : '<div class="empty-state"><h3>Every booking tells a story.</h3><p>Make a reservation to see its workflow here.</p></div>';
+  } catch (e) {
+    toast(e.message);
+  }
+}
+async function actions(event) {
+  const target = event.target.closest("button");
+  if (!target) return;
+  try {
+    if (target.dataset.page) page(target.dataset.page);
+    if (target.dataset.close) $("#" + target.dataset.close).close();
+    if (target.dataset.book) openBooking(target.dataset.book);
+    if (target.dataset.filter) {
+      state.filter = target.dataset.filter;
+      $$(".tab").forEach((t) => t.classList.toggle("active", t === target));
+      renderBookings();
+    }
+    if (target.dataset.edit)
+      openBooking(
+        null,
+        state.bookings.find((b) => b.id === target.dataset.edit),
+      );
+    if (target.dataset.cancel) {
+      state.cancelling = state.bookings.find(
+        (b) => b.id === target.dataset.cancel,
+      );
+      $("#cancel-summary").textContent =
+        state.cancelling.title + " · " + dt(state.cancelling.starts_at);
+      $("#confirm-dialog").showModal();
+    }
+    if (target.dataset.events) {
+      const el = $("#events-" + target.dataset.events);
+      el.classList.toggle("hidden");
+      if (!el.classList.contains("hidden")) {
+        const events = await api(
+          "/bookings/" + target.dataset.events + "/events",
+        );
+        el.innerHTML = events
+          .map(
+            (e) =>
+              `<p>${escapeHTML(e.detail)}<br><small>${dt(e.created_at)}</small></p>`,
+          )
+          .join("");
+      }
+    }
+    if (target.dataset.retry) {
+      await api("/bookings/" + target.dataset.retry + "/retry-sync", {
+        method: "POST",
+      });
+      toast("Calendar retry queued.");
+      loadBookings();
+    }
+    if (target.classList.contains("suggestion")) {
+      $("#chat-input").value = target.textContent;
+      $("#chat-input").focus();
+    }
+    if (target.id === "approve-proposal") {
+      target.disabled = true;
+      await api("/assistant/proposals/" + state.proposal.id + "/approve", {
+        method: "POST",
+      });
+      renderProposal(null);
+      toast("Approved. Your room is booked.");
+      loadBookings();
+      page("bookings");
+    }
+    if (target.id === "dismiss-proposal") {
+      await api("/assistant/proposals/" + state.proposal.id, {
+        method: "DELETE",
+      });
+      renderProposal(null);
+    }
+  } catch (e) {
+    target.disabled = false;
+    toast(e.message);
+  }
+}
+function setUser(user) {
+  state.user = user;
+  $("#user-name").textContent = user.name;
+  $("#avatar").textContent = user.name[0].toUpperCase();
+  $("#greeting").textContent = `A little room for good work, ${user.name}.`;
+}
+async function init() {
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  $("#search-date").value = local(tomorrow).slice(0, 10);
+  $("#local-time").textContent = new Date().toLocaleDateString(undefined, {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+  });
+  $$(".timezone").forEach(
+    (e) => (e.textContent = timezone.replaceAll("_", " ")),
+  );
+  document.addEventListener("click", actions);
+  $("#search-form").addEventListener("submit", (e) => {
+    e.preventDefault();
+    search();
+  });
+  $("#booking-form").addEventListener("submit", saveBooking);
+  $("#booking-form").addEventListener(
+    "input",
+    () => (state.requestKey = crypto.randomUUID()),
+  );
+  $("#confirm-cancel").addEventListener("click", cancelBooking);
+  $("#chat-form").addEventListener("submit", chat);
+  $("#ask-assistant").onclick = () => page("assistant");
+  $("#profile").onclick = () => $("#profile-dialog").showModal();
+  $("#sign-out").onclick = async () => {
+    try {
+      await api("/session", { method: "DELETE" });
+      location.reload();
+    } catch (error) {
+      toast(error.message);
+    }
+  };
+  $("#reset-chat").onclick = async () => {
+    try {
+      await api("/assistant/history", { method: "DELETE" });
+      renderMessages([]);
+      renderProposal(null);
+    } catch (error) {
+      toast(error.message);
+    }
+  };
+  $("#session-form").onsubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const user = await api("/session", {
+        method: "POST",
+        body: JSON.stringify({ name: $("#display-name").value }),
+      });
+      setUser(user);
+      $("#session-dialog").close();
+      loadBookings();
+    } catch (err) {
+      toast(err.message);
+    }
+  };
+  try {
+    state.rooms = await api("/rooms");
+    renderRooms();
+    await search();
+    setUser(await api("/session"));
+    await loadBookings();
+  } catch (e) {
+    if (!$("#session-dialog").open) toast(e.message);
+  }
+  const route = location.hash.slice(1);
+  if (["discover", "bookings", "assistant", "reliability"].includes(route))
+    page(route);
+  setInterval(() => {
+    if (state.user && state.page === "reliability") loadMetrics();
+  }, 10000);
+}
 init();
