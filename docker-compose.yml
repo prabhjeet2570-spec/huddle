@@ -13,5 +13,50 @@ services:
       test: ["CMD-SHELL", "pg_isready -U huddle"]
       interval: 3s
       retries: 20
+  migrate:
+    build: .
+    command: ["python", "-m", "app.db"]
+    environment:
+      DATABASE_URL: postgresql://huddle:huddle@db:5432/huddle
+    depends_on:
+      db:
+        condition: service_healthy
+  api:
+    build: .
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://huddle:huddle@db:5432/huddle
+      CALENDAR_URL: http://calendar:8001
+    ports:
+      - "127.0.0.1:8010:8010"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8010/ready')"]
+      interval: 10s
+      retries: 5
+  calendar:
+    build: .
+    command: ["uvicorn", "app.calendar_simulator:app", "--host", "0.0.0.0", "--port", "8001"]
+    environment:
+      CALENDAR_TOKEN: ${CALENDAR_TOKEN:-local-demo-calendar-token}
+      CALENDAR_DB: /data/calendar.sqlite
+    volumes:
+      - calendar_data:/data
+  worker:
+    build: .
+    command: ["python", "-m", "app.worker"]
+    environment:
+      CALENDAR_TOKEN: ${CALENDAR_TOKEN:-local-demo-calendar-token}
+      DATABASE_URL: postgresql://huddle:huddle@db:5432/huddle
+      CALENDAR_URL: http://calendar:8001
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      calendar:
+        condition: service_started
+    restart: unless-stopped
 volumes:
   huddle_pg:
+  calendar_data:

@@ -2,6 +2,7 @@
 
 from pathlib import Path
 
+import psycopg
 from fastapi import Depends, FastAPI, Request
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -9,6 +10,7 @@ from fastapi.staticfiles import StaticFiles
 from app.assistant import router as assistant_router
 from app.availability import router as availability_router
 from app.bookings import router as bookings_router
+from app.db import connect
 from app.operations import router as operations_router
 from app.rooms import router as rooms_router
 from app.session import current_user
@@ -54,3 +56,13 @@ async def same_origin_writes(request: Request, call_next):
     response.headers["X-Frame-Options"] = "DENY"
     response.headers["Referrer-Policy"] = "same-origin"
     return response
+
+
+@app.get("/ready")
+def ready():
+    try:
+        with connect() as conn:
+            conn.execute("SELECT id FROM outbox LIMIT 1")
+        return {"status": "ready"}
+    except psycopg.Error:
+        return JSONResponse({"status": "unavailable"}, status_code=503)
