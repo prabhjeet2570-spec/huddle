@@ -28,9 +28,7 @@ def test_booking_times_are_normalized_to_utc():
 @pytest.mark.parametrize("field", ["starts_at", "ends_at"])
 def test_booking_times_require_timezone(field):
     with pytest.raises(ValidationError, match="timezone"):
-        BookingRequest.model_validate(
-            booking_payload(**{field: "2026-10-05T09:00:00"})
-        )
+        BookingRequest.model_validate(booking_payload(**{field: "2026-10-05T09:00:00"}))
 
 
 @pytest.mark.parametrize(
