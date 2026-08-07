@@ -122,3 +122,10 @@ def test_model_can_only_propose(api, monkeypatch):
 def test_missing_key_is_explicit(api, monkeypatch):
     monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
     assert api("POST", "/assistant/chat", json={"message": "hello"}).status_code == 503
+
+
+def test_reset_invalidates_pending_approval(api):
+    identity, _ = proposal(api)
+    assert api("DELETE", "/assistant/history").status_code == 200
+    assert api("POST", f"/assistant/proposals/{identity}/approve").status_code == 409
+    assert api("GET", "/assistant/history").json() == {"messages": [], "proposal": None}

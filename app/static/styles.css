@@ -1419,3 +1419,57 @@ dialog select {
     scroll-behavior: auto !important;
   }
 }
+
+@media (max-width: 520px) {
+  .page-heading {
+    flex-wrap: wrap;
+  }
+  .page-heading > .button {
+    margin-top: 0;
+  }
+  .room-card {
+    display: block;
+  }
+  .room-image {
+    height: 170px;
+    min-height: 0;
+  }
+  .room-features {
+    gap: 16px;
+  }
+  .form-row {
+    flex-direction: column;
+    gap: 0;
+  }
+  .form-row label {
+    margin: 10px 0;
+  }
+  .chat-header {
+    flex-wrap: wrap;
+    padding: 14px;
+  }
+  .chat-header .badge {
+    margin-left: 0;
+  }
+  .chat-messages {
+    padding: 14px;
+  }
+  .message {
+    max-width: 100%;
+  }
+  .metric {
+    padding: 15px;
+  }
+  .metric strong {
+    font-size: 25px;
+  }
+  .topbar {
+    padding: 0 12px;
+  }
+  .breadcrumb {
+    font-size: 10px;
+  }
+  .breadcrumb span {
+    margin: 0 6px;
+  }
+}
