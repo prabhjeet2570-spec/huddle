@@ -23,6 +23,13 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 
+def source_commit():
+    supplied = os.getenv("HUDDLE_SOURCE_COMMIT") or os.getenv("GITHUB_SHA")
+    if supplied:
+        return supplied
+    return subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
+
+
 def main():
     url = os.environ.get("TEST_DATABASE_URL", "")
     if not url.endswith("/huddle_test"):
@@ -77,9 +84,7 @@ def main():
             async def experiment():
                 evidence = {
                     "recorded_at": datetime.now(UTC).isoformat(),
-                    "commit": subprocess.check_output(
-                        ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
-                    ).strip(),
+                    "commit": source_commit(),
                     "python": platform.python_version(),
                     "machine": platform.machine(),
                     "database": "PostgreSQL",
@@ -238,4 +243,11 @@ os._exit(73)
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as error:
+        # Surface the cause in the public CI check, not just authenticated logs.
+        message = f"{type(error).__name__}: {error}"
+        message = message.replace("%", "%25").replace("\n", "%0A").replace("\r", "%0D")
+        print(f"::error title=Recovery experiment::{message}", flush=True)
+        raise
