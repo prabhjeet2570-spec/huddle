@@ -74,7 +74,7 @@ on the same ports.
 5. Open **Reliability** to inspect the actual workflow records, retry counts,
    worker heartbeat, and synchronization latency.
 
-![Assistant with a live-model proposal awaiting approval](docs/screenshots/assistant.jpg)
+![LangGraph approval pause in the local scripted demo](docs/screenshots/langgraph.jpg)
 
 ## Guided LangGraph demo (no API key)
 
@@ -144,7 +144,7 @@ reproducible development. LangSmith tracing is not required.
 
 ## Measured evidence
 
-The current suite passes 56 tests. A [separate-process restart experiment](artifacts/workflow-restart.json)
+The current suite passes 57 tests. A [separate-process restart experiment](artifacts/workflow-restart.json)
 restores an approval checkpoint and verifies repeated approval creates one booking.
 Run it with `TEST_DATABASE_URL=.../huddle_test uv run python scripts/workflow_demo.py`.
 

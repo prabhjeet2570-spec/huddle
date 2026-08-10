@@ -80,3 +80,19 @@ def test_reset_leaves_no_resumable_action(api):
     api("DELETE", "/assistant/history")
     assert api("GET", "/assistant/workflow").json() == {"workflow": None}
     assert api("POST", f"/assistant/proposals/{proposal['id']}/approve").status_code == 409
+
+
+def test_no_alternatives_means_no_fallback_booking(api):
+    proposal = start(api, "conflict")
+    for room in ("maple", "birch"):
+        response = api("POST", "/bookings", json={**proposal["arguments"], "room_id": room})
+        assert response.status_code == 201
+    response = api("POST", f"/assistant/proposals/{proposal['id']}/approve")
+    assert response.status_code == 409 and response.json()["alternatives"] == []
+    assert len(api("GET", "/bookings").json()) == 2
+    assert (
+        api(
+            "POST", f"/assistant/proposals/{proposal['id']}/alternative", json={"room_id": "maple"}
+        ).status_code
+        == 409
+    )

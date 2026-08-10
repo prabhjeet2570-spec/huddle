@@ -103,8 +103,8 @@ SQL migrations run transactionally under an advisory lock and are recorded in
 this with a one-shot migration service. No database migration runs on an ordinary
 HTTP request.
 
-`/health` checks process liveness. `/ready` checks database access and the outbox
-schema. The worker keeps pending work durable through process failure; PostgreSQL
+`/health` checks process liveness. `/ready` checks database access, the outbox, graph checkpoints, and proposal
+workflow columns. The worker keeps pending work durable through process failure; PostgreSQL
 backup/recovery remains an operational responsibility.
 
 ## LangGraph migration

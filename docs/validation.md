@@ -1,7 +1,7 @@
 # Validation record — 2026-10-04
 
 - Python 3.12.13, macOS arm64, local PostgreSQL 16 container.
-- 50 tests passed with `TEST_DATABASE_URL` set to the isolated `huddle_test` database.
+- Before the LangGraph migration, 50 tests passed with `TEST_DATABASE_URL` set to the isolated `huddle_test` database.
 - Ruff lint/format checks and JavaScript syntax validation passed.
 - Container image built from the lockfile.
 - Full Compose stack started on alternate local ports; session creation, allocation,
@@ -78,9 +78,9 @@ Subsequent script diagnostics expose exceptions directly in CI annotations.
 
 ## LangGraph migration validation
 
-The migrated implementation passed **56 automated tests**, including PostgreSQL
+The migrated implementation passed **57 automated tests**, including PostgreSQL
 checkpoint pause/resume, six concurrent approvals producing one booking/outbox,
-conflict alternatives with fresh approval, owner isolation, expiry, dismissal,
+conflict alternatives with fresh approval, no-availability exhaustion, owner isolation, expiry, dismissal,
 and reset. Existing booking and calendar-worker tests also passed.
 
 The 13 live OpenRouter scenarios were rerun against LangGraph; all scripted checks
@@ -98,3 +98,8 @@ alternative, restarted the actual API process, refreshed the same browser sessio
 and approved the restored proposal successfully. The workflow panel showed
 `reserved`. This verifies a committed pause across restart, not recovery of an
 in-flight model call. Screenshots labeled LangGraph show the updated scripted demo.
+
+The updated assistant UI was also checked at 390px with no horizontal overflow.
+The updated Docker image built successfully with the existing pinned uv 0.9.9
+builder and the frozen lockfile. The new CI restart step is configured; hosted CI
+has not been run for these local commits.

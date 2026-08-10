@@ -65,6 +65,8 @@ def ready():
     try:
         with connect() as conn:
             conn.execute("SELECT id FROM outbox LIMIT 1")
+            conn.execute("SELECT thread_id FROM checkpoints LIMIT 1")
+            conn.execute("SELECT workflow_id FROM proposals LIMIT 1")
         return {"status": "ready"}
     except psycopg.Error:
         return JSONResponse({"status": "unavailable"}, status_code=503)
