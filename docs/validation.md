@@ -21,9 +21,34 @@ prepare an approval proposal when complete, and use explicit local display times
 A fresh conversation then produced Cedar, four attendees, 10–11 AM local time,
 with a correct proposal card. Clicking approval created the booking.
 
-This was a functional smoke check, not a fixed evaluation set. Do not turn it into
-a completion percentage or claim broad natural-language correctness. Unit/integration
-assistant tests use controlled model responses and are separate evidence.
+A subsequent live evaluation ran 12 scenarios, then repeated them with an
+occupied-room scenario added. All 13 scenarios in the recorded second run passed
+the scripted checks. The [raw responses and checks](../artifacts/assistant-evaluation.json)
+include exact requests, missing times/attendees, follow-up details, proposal edits,
+capacity overflow, unknown rooms, past dates, chat approval bypass attempts,
+listing, cancellation requests, local-time conversion, and an occupied room.
+Every case checks that chat created zero bookings; proposal cases check selected
+expected fields. The occupied-room fixture is created separately through the API.
+Manual response review found no false confirmation in this run.
+
+Reproduce with the server's OpenRouter key in `.env`:
+
+```sh
+TEST_DATABASE_URL=postgresql://huddle:huddle@localhost:5438/huddle_test \
+  uv run python scripts/evaluate_assistant.py
+```
+
+This is opt-in and spends real model tokens. It creates synthetic workspaces and
+an occupied-room fixture in `huddle_test`, without truncating existing records.
+Do not run concurrently with integration tests, which clear that database.
+It overwrites the evaluation artifact. Dates advance with the run date, and local
+UTC offsets are computed with the named timezone.
+
+These are small, curated English scenarios for one model, not a representative
+completion benchmark. Checks do not grade every word, field, or tool invocation.
+DST ambiguity, multilingual requests, extensive prompt injection, provider outages,
+and a statistically meaningful repeated-run evaluation remain uncovered here.
+Unit/integration assistant tests use controlled model responses and are separate evidence.
 
 ## Screenshot provenance
 

@@ -126,11 +126,11 @@ production benchmark. Times include the configured lease/retry delays and vary
 by run. There is no claim of exhaustive fault coverage or a measured improvement
 over a prior baseline.
 
-The live OpenRouter smoke check reached a correct proposal and an approved booking.
-Earlier attempts exposed a redundant question and incorrect local-time wording;
-the prompt and local-time tool fields were revised. This is **not** a task-completion
-benchmark. Review the proposal before approving; language-model interpretation
-can still be wrong.
+The live OpenRouter walkthrough reached a correct proposal and an approved booking.
+A subsequent [13-scenario live evaluation](artifacts/assistant-evaluation.json) passed
+its scripted checks for interpretation, clarification, proposal edits, occupied rooms,
+and approval boundaries. See [scope and reproduction](docs/validation.md#live-model-check).
+This small curated set is not a general task-completion benchmark; review every proposal.
 
 ## Verify and reproduce
 
@@ -181,8 +181,8 @@ is uploaded as a CI artifact.
   Editing and cancellation use the UI. Each turn has at most three model calls,
   four tool calls per model response, and 700 output tokens per call; there is a
   30-turn hourly workspace limit. This is not a public-service abuse defense.
-- **Limited evaluation:** four crash/timeout trials and a small live-model smoke
-  check do not establish production reliability or general language accuracy.
+- **Limited evaluation:** four crash/timeout trials and 13 curated live-model
+  scenarios do not establish production reliability or general language accuracy.
 - **Demo catalog:** three static rooms with illustrative artwork. No real venue,
   organization, user adoption, delivered email, or uptime is claimed.
 - **Deployment:** HTTPS, verified authentication, backup/restore procedures,
