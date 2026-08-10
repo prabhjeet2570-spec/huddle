@@ -112,3 +112,37 @@ reservation node. The PostgreSQL checkpoint adapter owns its schema; `app.db`
 initializes it after application migrations using a separate autocommit connection.
 Migration 004 invalidates legacy pending proposals because they have no graph
 checkpoint. Existing bookings and completed proposals are retained.
+
+### Request and checkpoint boundaries
+
+Each chat turn has its own server-generated workflow ID. Conversation messages
+provide context across turns; a new instruction supersedes pending proposals.
+The graph routes `model -> tools -> model` with a three-call model budget, or
+`tools -> approval (interrupt) -> reserve`. A clarification ends the current turn;
+the next turn reuses the saved conversation. OpenRouter remains the model provider.
+
+`PostgresSaver` uses the same psycopg connection/transaction as proposal and booking
+writes. Synchronous checkpoint writes therefore commit with the API request. A
+completed approval pause survives restart; an interrupted, uncommitted chat turn
+rolls back and must be retried. This implementation does not claim mid-model-call
+recovery. No keys or browser cookies are stored in graph state.
+
+Approval accepts only a proposal ID. The server checks ownership, state, expiry,
+and the paused node before issuing `Command(resume=...)`. The reservation node
+rechecks the proposal. Booking, outbox, proposal result, and resumed checkpoint
+commit together. Duplicate approval returns the stored result. A conflict rolls
+back only the allocation savepoint, persists a conflict outcome, and returns
+currently available alternatives. Choosing an alternative creates a fresh proposal
+for the same time/group size; it never books silently.
+
+`GET /assistant/workflow` exposes only the current owner's status, step trace,
+and alternatives. Dismiss/reset revoke authority in the proposal table even if an
+old checkpoint still exists. Checkpoint history is retained locally; reset hides
+the conversation and revokes proposals, but is not a data-erasure operation.
+
+### Scripted demonstrations
+
+`POST /assistant/demo` prepares a fictional study-room proposal and executes the
+same graph approval/reservation nodes without calling a model. The conflict fixture
+creates a competing booking owned by a synthetic session. These local-only product
+scenarios intentionally write demo data and are not production administrative APIs.

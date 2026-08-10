@@ -1,10 +1,8 @@
 import json
 from datetime import UTC, datetime, timedelta
-from uuid import uuid4
 
 import httpx
 import pytest
-from psycopg.types.json import Jsonb
 
 from app.db import connect
 
@@ -20,12 +18,11 @@ def proposal(api, **changes):
         "ends_at": (start + timedelta(hours=1)).isoformat(),
         **changes,
     }
-    identity = uuid4()
+    from app.demo import pause_proposal
+
     with connect() as conn:
-        conn.execute(
-            "INSERT INTO proposals(id,owner_id,arguments) VALUES (%s,%s,%s)",
-            (identity, user["id"], Jsonb(arguments)),
-        )
+        result = pause_proposal(conn, user, arguments, "Test approval")
+    identity = result["proposal"]["id"]
     return identity, arguments
 
 

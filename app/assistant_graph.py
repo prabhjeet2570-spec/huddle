@@ -202,7 +202,7 @@ def build_graph(conn):
         ("reserve", reserve),
     ]:
         graph.add_node(name, node)
-    graph.add_edge(START, "model")
+    graph.add_conditional_edges(START, lambda s: "approval" if s.get("proposal") else "model")
     graph.add_conditional_edges("model", lambda s: "tools" if s.get("calls") else END)
     graph.add_conditional_edges("tools", lambda s: "approval" if s.get("proposal") else "model")
     graph.add_edge("approval", "reserve")
