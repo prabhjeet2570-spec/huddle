@@ -28,10 +28,13 @@ jobs:
       - run: uv run ruff format --check app tests scripts
       - run: uv run pytest -q
       - run: node --check app/static/app.js
+      - run: uv run python scripts/workflow_demo.py
       - run: uv run python scripts/recovery_demo.py
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: recovery-evidence
-          path: artifacts/recovery-results.json
+          path: |
+            artifacts/recovery-results.json
+            artifacts/workflow-restart.json
       - run: docker build -t huddle:ci .

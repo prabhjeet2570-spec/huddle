@@ -134,7 +134,19 @@ stores events in SQLite.
 
 More detail: [architecture and boundaries](docs/architecture.md).
 
+## Stack
+
+Python 3.12+, FastAPI, Pydantic, LangGraph with the PostgreSQL checkpoint adapter,
+PostgreSQL 16/psycopg, OpenRouter (`openai/gpt-4o-mini` by default), HTTPX, vanilla
+HTML/CSS/JavaScript, a Python outbox worker, and a SQLite-backed calendar simulator.
+Docker Compose runs the local services; uv, Ruff, pytest, and GitHub Actions support
+reproducible development. LangSmith tracing is not required.
+
 ## Measured evidence
+
+The current suite passes 56 tests. A [separate-process restart experiment](artifacts/workflow-restart.json)
+restores an approval checkpoint and verifies repeated approval creates one booking.
+Run it with `TEST_DATABASE_URL=.../huddle_test uv run python scripts/workflow_demo.py`.
 
 The committed [raw run](artifacts/recovery-results.json) records the source commit,
 Python version, machine architecture, every request latency, trial outcomes,

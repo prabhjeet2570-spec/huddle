@@ -75,3 +75,26 @@ suite passed. An unchanged-tree rerun at `b174a3c` passed the full workflow,
 including the recovery script and image build. The initial failure's specific
 cause was not established; it is not counted as a successful recovery trial.
 Subsequent script diagnostics expose exceptions directly in CI annotations.
+
+## LangGraph migration validation
+
+The migrated implementation passed **56 automated tests**, including PostgreSQL
+checkpoint pause/resume, six concurrent approvals producing one booking/outbox,
+conflict alternatives with fresh approval, owner isolation, expiry, dismissal,
+and reset. Existing booking and calendar-worker tests also passed.
+
+The 13 live OpenRouter scenarios were rerun against LangGraph; all scripted checks
+passed. `artifacts/assistant-evaluation.json` now records that run. These checks
+retain the limitations described above; guided demos are not live-model evidence.
+
+`uv run python scripts/workflow_demo.py` (with `TEST_DATABASE_URL` set) prepares a
+pending approval in one Python process, exits it, and resumes in a fresh process.
+The recorded [restart evidence](../artifacts/workflow-restart.json) shows a restored
+approval pause, one reservation, and the same result on repeated approval. No model
+calls are made. The script leaves synthetic records and does not truncate data.
+
+Browser verification exercised a competing reservation, selected Maple as an
+alternative, restarted the actual API process, refreshed the same browser session,
+and approved the restored proposal successfully. The workflow panel showed
+`reserved`. This verifies a committed pause across restart, not recovery of an
+in-flight model call. Screenshots labeled LangGraph show the updated scripted demo.

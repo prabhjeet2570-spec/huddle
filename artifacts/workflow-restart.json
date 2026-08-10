@@ -1,0 +1,14 @@
+{
+  "recorded_at": "2026-10-04T20:03:02.245666+00:00",
+  "scenario": "Approval checkpoint restored by a fresh Python process",
+  "model_calls": 0,
+  "checks": {
+    "restored_status": "pending",
+    "restored_next": [
+      "approval"
+    ],
+    "same_result_on_repeated_approval": true,
+    "booking_count": 1,
+    "status": "approved"
+  }
+}
