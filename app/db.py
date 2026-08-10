@@ -8,11 +8,12 @@ from psycopg.rows import dict_row
 load_dotenv()
 
 
-def connect():
+def connect(*, autocommit=False):
     return psycopg.connect(
         os.getenv("DATABASE_URL", "postgresql://huddle:huddle@localhost:5438/huddle"),
         row_factory=dict_row,
         connect_timeout=5,
+        autocommit=autocommit,
     )
 
 
@@ -26,6 +27,16 @@ def migrate():
             ).fetchone():
                 conn.execute(path.read_text())
                 conn.execute("INSERT INTO schema_migrations VALUES (%s)", (path.name,))
+
+    # The adapter owns its schema and uses concurrent indexes, requiring autocommit.
+    from langgraph.checkpoint.postgres import PostgresSaver
+
+    with connect(autocommit=True) as conn:
+        conn.execute("SELECT pg_advisory_lock(481921)")
+        try:
+            PostgresSaver(conn).setup()
+        finally:
+            conn.execute("SELECT pg_advisory_unlock(481921)")
 
 
 if __name__ == "__main__":

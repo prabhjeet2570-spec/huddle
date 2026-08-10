@@ -104,3 +104,11 @@ HTTP request.
 `/health` checks process liveness. `/ready` checks database access and the outbox
 schema. The worker keeps pending work durable through process failure; PostgreSQL
 backup/recovery remains an operational responsibility.
+
+## LangGraph migration
+
+The assistant graph defines model/tool routing, a human-approval interrupt, and a
+reservation node. The PostgreSQL checkpoint adapter owns its schema; `app.db`
+initializes it after application migrations using a separate autocommit connection.
+Migration 004 invalidates legacy pending proposals because they have no graph
+checkpoint. Existing bookings and completed proposals are retained.
