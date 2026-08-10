@@ -31,3 +31,22 @@ The screenshots in `screenshots/` were captured from the running local applicati
 Room illustrations are locally authored SVG assets. Meetings are synthetic data
 entered during the walkthrough. No dashboard values were hardcoded or edited into
 screenshots. The assistant screenshot shows an actual live-model proposal.
+
+## History and repeatability
+
+The development milestones were later split into smaller, dependency-ordered
+commits. The raw artifact retains the original recorded source hash
+`65ddb7fec18e55a223b89db4f4836ea6f481506a`; rewritten commit `1d71608` has an
+identical Git tree. This was verified directly rather than changing historical
+measurements. The first ten implementation milestones became twenty focused
+commits; no dates or test results were backdated.
+
+A separate Linux/arm64 container reproduction also passed the four fault trials.
+The script accepts `HUDDLE_SOURCE_COMMIT` (or CI's `GITHUB_SHA`) for source archives
+without a Git executable; otherwise it records `git rev-parse HEAD`.
+
+The first hosted CI attempt failed in the recovery step after its unit/integration
+suite passed. An unchanged-tree rerun at `b174a3c` passed the full workflow,
+including the recovery script and image build. The initial failure's specific
+cause was not established; it is not counted as a successful recovery trial.
+Subsequent script diagnostics expose exceptions directly in CI annotations.
