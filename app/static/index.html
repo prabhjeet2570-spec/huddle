@@ -182,8 +182,8 @@
         <section class="page hidden" id="assistant">
           <div class="page-heading">
             <div>
-              <p class="eyebrow">A LITTLE HELP GOES A LONG WAY</p>
-              <h1>Your meeting, simplified.</h1>
+              <p class="eyebrow">LOCAL DEMO · POWERED BY LANGGRAPH</p>
+              <h1>Your study session, sorted.</h1>
               <p>
                 Describe what you need. Review every booking before it happens.
               </p>
@@ -191,6 +191,12 @@
             <span class="badge neutral" id="model-status"
               >Checking connection</span
             >
+          </div>
+          <div class="demo-strip">
+            <div><b>Try the workflow</b><p>Fictional rooms. Real database safeguards. Guided scenarios use no model tokens.</p></div>
+            <button class="button secondary" data-demo="booking">1 · Book a room</button>
+            <button class="button secondary" data-demo="conflict">2 · Handle a conflict</button>
+            <button class="button secondary" data-demo="restart">3 · Pause &amp; resume</button>
           </div>
           <div class="assistant-layout">
             <div class="chat-panel">
@@ -230,6 +236,11 @@
               </p>
             </div>
             <aside class="assistant-notes">
+              <div class="note-card workflow-card" aria-live="polite">
+                <p class="eyebrow">WORKFLOW · POSTGRESQL CHECKPOINT</p>
+                <div id="workflow-state">Start a conversation or a guided demo.</div>
+                <button class="button secondary" id="refresh-workflow">Refresh workflow</button>
+              </div>
               <div class="note-card">
                 <span class="note-symbol">✧</span>
                 <h3>A thoughtful copilot.</h3>

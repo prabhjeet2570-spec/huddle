@@ -4,9 +4,11 @@
 flowchart LR
     UI[Browser UI] --> API[FastAPI]
     API --> PG[(PostgreSQL)]
-    API --> OR[OpenRouter]
-    OR --> P[Proposal only]
+    API --> G[LangGraph: model and tools]
+    G --> OR[OpenRouter]
+    G --> P[Proposal and approval interrupt]
     P --> PG
+    PG --> CP[Graph checkpoints]
     UI -->|explicit approval| API
     PG --> O[Transactional outbox]
     O --> W[Separate worker]

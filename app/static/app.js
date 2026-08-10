@@ -257,6 +257,19 @@ function renderProposal(p) {
     ? `<div class="proposal-card"><p class="eyebrow">YOUR APPROVAL REQUIRED</p><h3>${escapeHTML(p.arguments.title)}</h3><p>${escapeHTML(p.arguments.room_id)} · ${p.arguments.attendees} people<br>${dt(p.arguments.starts_at)} – ${tm(p.arguments.ends_at)}<br><small>Expires ${tm(p.expires_at)}. A new message replaces this proposal.</small></p><button class="button primary" id="approve-proposal">Approve & book</button><button class="button secondary" id="dismiss-proposal">Dismiss</button></div>`
     : "";
 }
+async function loadWorkflow() {
+  const {workflow: w} = await api("/assistant/workflow");
+  if (!w) {
+    $("#workflow-state").textContent = "Start a conversation or a guided demo.";
+    return;
+  }
+  const labels = {pending: "Waiting for your approval", approved: "Reservation confirmed", conflict: "Room taken · choose an alternative", expired: "Proposal expired", superseded: "Replaced by a new request", dismissed: "Proposal dismissed", answered: "Ready for your reply"};
+  $("#workflow-state").innerHTML = `<h3>${escapeHTML(labels[w.status] || w.status)}</h3>
+    <p>${w.demo ? "Scripted scenario · no LLM call" : "Live assistant workflow"}</p>
+    <ol class="workflow-trace">${w.trace.map(step => `<li>${escapeHTML(step)}</li>`).join("")}${w.status === "pending" ? "<li class=waiting>Waiting for approval</li>" : ""}</ol>
+    ${w.status === "conflict" ? `<p>${escapeHTML(w.message)}</p>${w.alternatives.length ? w.alternatives.map(room => `<button class="button secondary" data-alternative="${escapeHTML(room.id)}" data-workflow="${escapeHTML(w.id)}">Review ${escapeHTML(room.name)}</button>`).join("") : "<p>No matching rooms remain. Start a new search.</p>"}` : ""}
+    <small>Saved workflow ${escapeHTML(w.id.slice(0,8))}</small>`;
+}
 async function loadAssistant() {
   try {
     const status = await api("/assistant/status");
@@ -266,6 +279,7 @@ async function loadAssistant() {
     const h = await api("/assistant/history");
     renderMessages(h.messages);
     renderProposal(h.proposal);
+    await loadWorkflow();
   } catch (e) {
     toast(e.message);
   }
@@ -294,6 +308,7 @@ async function chat(event) {
       `<div class="message assistant">${escapeHTML(result.message)}</div>`,
     );
     renderProposal(result.proposal);
+    await loadWorkflow();
   } catch (e) {
     $("#thinking")?.remove();
     $("#chat-messages").insertAdjacentHTML(
@@ -398,6 +413,18 @@ async function actions(event) {
       $("#chat-input").value = target.textContent;
       $("#chat-input").focus();
     }
+    if (target.dataset.demo) {
+      target.disabled = true;
+      await api("/assistant/demo", {method: "POST", body: JSON.stringify({scenario: target.dataset.demo})});
+      await loadAssistant();
+      target.disabled = false;
+    }
+    if (target.dataset.alternative) {
+      target.disabled = true;
+      await api(`/assistant/proposals/${target.dataset.workflow}/alternative`, {method: "POST", body: JSON.stringify({room_id: target.dataset.alternative})});
+      await loadAssistant();
+    }
+    if (target.id === "refresh-workflow") await loadAssistant();
     if (target.id === "approve-proposal") {
       target.disabled = true;
       await api("/assistant/proposals/" + state.proposal.id + "/approve", {
@@ -406,17 +433,19 @@ async function actions(event) {
       renderProposal(null);
       toast("Approved. Your room is booked.");
       loadBookings();
-      page("bookings");
+      await loadWorkflow();
     }
     if (target.id === "dismiss-proposal") {
       await api("/assistant/proposals/" + state.proposal.id, {
         method: "DELETE",
       });
       renderProposal(null);
+      await loadWorkflow();
     }
   } catch (e) {
     target.disabled = false;
     toast(e.message);
+    if (state.page === "assistant") await loadAssistant();
   }
 }
 function setUser(user) {

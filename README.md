@@ -1,8 +1,10 @@
 # Huddle
 
-**A little room for good work.** Meeting-room booking with explicit AI approval,
-PostgreSQL-enforced allocation, and calendar synchronization that recovers after
-process and network failures.
+**A local LangGraph study-room booking demo.** A student describes a study session,
+reviews a proposal, and approves a reservation. PostgreSQL stores workflow
+checkpoints and prevents overlapping bookings; a separate worker synchronizes a
+simulated calendar. Rooms and users are fictional. There is no NYU integration,
+scraping, or public deployment requirement.
 
 ![Huddle room discovery](docs/screenshots/rooms.jpg)
 
@@ -10,7 +12,7 @@ process and network failures.
 
 - Find rooms by time and capacity; inspect occupied and free time windows.
 - Book, reschedule, or cancel. Conflicting edits leave the original reservation intact.
-- Ask the OpenRouter-powered assistant to find a room and prepare a proposal.
+- Ask the LangGraph-orchestrated, OpenRouter-powered assistant to find a room and prepare a proposal.
   Only the **Approve & book** button executes that exact, expiring proposal.
 - Inspect the booking's history and live synchronization state. Calendar failures
   leave the room reserved, retry automatically, and become visible review tasks
@@ -74,6 +76,29 @@ on the same ports.
 
 ![Assistant with a live-model proposal awaiting approval](docs/screenshots/assistant.jpg)
 
+## Guided LangGraph demo (no API key)
+
+Open **Huddle assistant** and choose a scenario:
+
+1. **Book a room:** creates a scripted proposal and pauses the real graph. Click
+   **Approve & book**; the workflow panel changes to confirmed.
+2. **Handle a conflict:** a simulated student takes the proposed room. Approval
+   returns a conflict; select **Review Maple** or another offered room, then approve
+   the new proposal. No fallback reservation happens without fresh approval.
+3. **Pause & resume:** prepare a proposal, restart only the API, refresh the same
+   browser session, and approve within five minutes. The pending graph is restored
+   from PostgreSQL. Repeated approval returns the same booking.
+
+For Compose, restart with `docker compose restart api`. With the native runner,
+stop/restart `uv run python scripts/dev.py`. Keep PostgreSQL and its volume intact.
+These controls use deterministic fixtures, not LLM-generated responses. Use the
+chat box to exercise the live OpenRouter model. Both paths share the approval and
+reservation graph nodes. Fixtures leave synthetic reservations in the local DB.
+
+The workflow panel shows the recorded steps and current approval state. On small
+screens it appears below the chat. Existing pending proposals from the pre-LangGraph
+version are invalidated by migration 004; existing bookings remain intact.
+
 ## Engineering decisions
 
 **PostgreSQL owns allocation.** An exclusion constraint rejects overlapping
@@ -96,11 +121,16 @@ leads to reconciliation against the same event ID. Versioned writes prevent an
 old request from overwriting a newer calendar state. Six unsuccessful attempts
 produce a review task; an owner can explicitly retry it.
 
-**One deployable application, separate worker.** FastAPI serves a responsive
-HTML/CSS/JavaScript UI. There is no frontend build service or agent framework;
-the tool loop is small enough to inspect. PostgreSQL stores reservations,
-approvals, histories, usage records, and pending work. The independent HTTP
-simulator stores calendar events in SQLite.
+**LangGraph orchestrates; PostgreSQL enforces.** A Python `StateGraph` routes
+model calls and tools, pauses with `interrupt()` for approval, and resumes with
+`Command(resume=...)` through an authenticated endpoint. PostgreSQL checkpoints
+and booking writes share a transaction. A committed approval pause survives an
+API restart; an interrupted, uncommitted chat request must be retried.
+
+**One local application, separate worker.** FastAPI serves a responsive vanilla
+HTML/CSS/JavaScript UI. PostgreSQL stores reservations, approvals, graph checkpoints,
+histories, usage records, and pending work. The independent HTTP calendar simulator
+stores events in SQLite.
 
 More detail: [architecture and boundaries](docs/architecture.md).
 

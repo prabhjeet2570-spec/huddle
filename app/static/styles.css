@@ -1473,3 +1473,17 @@ dialog select {
     margin: 0 6px;
   }
 }
+
+.demo-strip { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 20px; margin-bottom: 24px; background: #eee8f8; border: 1px solid #ddd3ee; border-radius: 18px; }
+.demo-strip > div { flex: 1 1 260px; }
+.demo-strip p { margin: 6px 0 0; color: #655c73; font-size: 13px; }
+.workflow-trace { padding-left: 23px; font-size: 13px; line-height: 1.9; }
+.workflow-trace li::marker { color: #7542a6; }
+.workflow-trace .waiting { font-weight: 700; color: #7542a6; }
+.workflow-card .button { margin: 5px 4px 5px 0; }
+.workflow-card small { display: block; color: #756c80; margin-top: 12px; }
+@media (max-width: 800px) {
+  .assistant-notes { display: block; }
+  .assistant-notes > .note-card:not(.workflow-card) { display: none; }
+  .demo-strip .button { width: 100%; }
+}
