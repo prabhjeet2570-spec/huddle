@@ -21,7 +21,7 @@ from sqlalchemy import (
     UniqueConstraint,
     func,
 )
-from sqlalchemy.dialects.postgresql import JSONB, TSTZRANGE
+from sqlalchemy.dialects.postgresql import JSONB, TSTZRANGE, ExcludeConstraint
 from sqlalchemy.dialects.postgresql import UUID as PgUUID
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
@@ -113,7 +113,7 @@ class ReservationModel(Base):
     title: Mapped[str] = mapped_column(String(200), nullable=False)
     attendees: Mapped[int] = mapped_column(Integer, nullable=False)
     #: The half-open ``[starts_at, ends_at)`` interval, stored as a native
-    #: range rather than two timestamp columns.
+    #: range so the exclusion constraint can index it with GiST.
     period: Mapped[object] = mapped_column(TSTZRANGE, nullable=False)
     state: Mapped[str] = mapped_column(String(16), nullable=False)
     hold_expires_at: Mapped[datetime | None] = mapped_column(
@@ -125,6 +125,19 @@ class ReservationModel(Base):
     )
 
     __table_args__ = (
+        # The whole concurrency story in one declaration: no two reservations
+        # that currently occupy a room may have overlapping periods. The WHERE
+        # clause is what lets cancelled and expired rows stay in the table as
+        # an audit trail without blocking anybody.
+        ExcludeConstraint(
+            ("room_id", "="),
+            ("period", "&&"),
+            name="ex_reservations_no_overlap",
+            using="gist",
+            where=(
+                f"state IN ('{ReservationState.HELD}', '{ReservationState.CONFIRMED}')"
+            ),
+        ),
         CheckConstraint(
             "state IN ('held', 'confirmed', 'cancelled', 'expired')",
             name="ck_reservations_state",
