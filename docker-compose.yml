@@ -1,0 +1,21 @@
+name: huddle
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: huddle
+      POSTGRES_PASSWORD: huddle
+      POSTGRES_DB: huddle
+    ports:
+      - "5433:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U huddle -d huddle"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+volumes:
+  db-data:
