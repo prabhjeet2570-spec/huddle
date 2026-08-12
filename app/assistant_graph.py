@@ -104,6 +104,15 @@ def build_graph(conn):
                         for b in list_bookings(user={"id": state["owner_id"]})
                     ]
                 elif name == "propose_booking":
+                    # A catalog display name differs only in case from its ID.
+                    # Canonicalize known IDs before validation; never guess unknown rooms.
+                    room_id = args.get("room_id") if isinstance(args, dict) else None
+                    if isinstance(room_id, str) and room_id.strip().lower() in {
+                        "cedar",
+                        "maple",
+                        "birch",
+                    }:
+                        args["room_id"] = room_id.strip().lower()
                     booking = BookingRequest.model_validate(args)
                     validate_request(booking)
                     row = conn.execute(

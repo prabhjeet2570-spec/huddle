@@ -103,3 +103,13 @@ The updated assistant UI was also checked at 390px with no horizontal overflow.
 The updated Docker image built successfully with the existing pinned uv 0.9.9
 builder and the frozen lockfile. The new CI restart step is configured; hosted CI
 has not been run for these local commits.
+
+## Functional and UI review
+
+A browser check exposed a live-model contract failure: GPT-4o-mini supplied the
+display name `Birch` instead of ID `birch`, repeated the invalid call, and exhausted
+the budget. The tool schema now enumerates valid IDs, the prompt gives exact IDs,
+and the proposal handler canonicalizes case/whitespace only for known catalog IDs.
+Unknown rooms remain invalid. The repeated live request produced Birch, five
+attendees, October 11, 2–3 PM local time, and approval created the reservation.
+The suite now passes **58 tests**, including the capitalization regression.

@@ -17,6 +17,9 @@ def tool(name, description, schema):
     }
 
 
+BOOKING_SCHEMA = BookingRequest.model_json_schema()
+BOOKING_SCHEMA["properties"]["room_id"]["enum"] = ["cedar", "maple", "birch"]
+
 TOOLS = [
     tool(
         "search_rooms",
@@ -26,7 +29,7 @@ TOOLS = [
     tool(
         "propose_booking",
         "Prepare a booking for explicit user approval. This DOES NOT book a room.",
-        BookingRequest.model_json_schema(),
+        BOOKING_SCHEMA,
     ),
     tool(
         "list_bookings",
@@ -39,7 +42,8 @@ TOOLS = [
 def system_prompt(timezone):
     zone = ZoneInfo(timezone)
     return f"""You are Huddle, a concise meeting-room assistant. Current local time is {datetime.now(zone).isoformat()}.
-User timezone: {timezone}. Rooms: Cedar (4 people), Maple (8), Birch (12).
+User timezone: {timezone}. Rooms: Cedar (ID cedar, 4 people), Maple (ID maple, 8), Birch (ID birch, 12).
+Tool room_id values must be the lowercase IDs, never display names.
 Ask only for missing time, duration, or attendee details; reuse details already given.
 Use tools for actual availability. Once room, start, end and attendees are known, call propose_booking immediately.
 Do not ask permission to prepare a proposal: the proposal card itself asks for approval.

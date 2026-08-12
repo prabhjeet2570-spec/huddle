@@ -74,8 +74,10 @@ def test_changed_instruction_invalidates_old_proposal(api, monkeypatch):
     assert api("GET", "/bookings").json() == []
 
 
-def test_model_can_only_propose(api, monkeypatch):
+@pytest.mark.parametrize("model_room_id", ["cedar", "Cedar"])
+def test_model_can_only_propose(api, monkeypatch, model_room_id):
     _, arguments = proposal(api)
+    arguments["room_id"] = model_room_id
     monkeypatch.setenv("OPENROUTER_API_KEY", "test-only-placeholder")
 
     def fake(self, url, **kwargs):
@@ -107,6 +109,7 @@ def test_model_can_only_propose(api, monkeypatch):
     monkeypatch.setattr(httpx.Client, "post", fake)
     response = api("POST", "/assistant/chat", json={"message": "Book a room"})
     assert response.status_code == 200 and response.json()["proposal"]
+    assert response.json()["proposal"]["arguments"]["room_id"] == "cedar"
     assert api("GET", "/bookings").json() == []
     assert (
         api(
