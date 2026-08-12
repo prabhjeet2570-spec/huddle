@@ -115,6 +115,29 @@ def build_graph(conn):
                         args["room_id"] = room_id.strip().lower()
                     booking = BookingRequest.model_validate(args)
                     validate_request(booking)
+                    available = search_availability(
+                        AvailabilityQuery(
+                            starts_at=booking.starts_at,
+                            ends_at=booking.ends_at,
+                            min_capacity=booking.attendees,
+                        )
+                    ).rooms
+                    if booking.room_id not in {room.id for room in available}:
+                        names = ", ".join(room.name for room in available)
+                        message = f"{booking.room_id.title()} is unavailable for that time. "
+                        message += (
+                            f"Available alternatives: {names}. Ask for one of these rooms to review a new proposal."
+                            if names
+                            else "No rooms matching your group size are available. Try another time."
+                        )
+                        # Finish deterministically rather than spending model calls
+                        # on repeated attempts to propose the same occupied room.
+                        return {
+                            "outcome": "unavailable",
+                            "message": message,
+                            "alternatives": [room.model_dump() for room in available],
+                            "trace": trace + ["unavailable"],
+                        }
                     row = conn.execute(
                         "INSERT INTO proposals(id,owner_id,arguments,workflow_id) VALUES (%s,%s,%s,%s) RETURNING id,arguments,expires_at",
                         (
@@ -211,9 +234,27 @@ def build_graph(conn):
         ("reserve", reserve),
     ]:
         graph.add_node(name, node)
-    graph.add_conditional_edges(START, lambda s: "approval" if s.get("proposal") else "model")
+    graph.add_conditional_edges(
+        START,
+        lambda s: (
+            END
+            if s.get("outcome") == "unavailable"
+            else "approval"
+            if s.get("proposal")
+            else "model"
+        ),
+    )
     graph.add_conditional_edges("model", lambda s: "tools" if s.get("calls") else END)
-    graph.add_conditional_edges("tools", lambda s: "approval" if s.get("proposal") else "model")
+    graph.add_conditional_edges(
+        "tools",
+        lambda s: (
+            END
+            if s.get("outcome") == "unavailable"
+            else "approval"
+            if s.get("proposal")
+            else "model"
+        ),
+    )
     graph.add_edge("approval", "reserve")
     graph.add_edge("reserve", END)
     return graph.compile(checkpointer=PostgresSaver(conn))

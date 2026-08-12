@@ -148,3 +148,11 @@ the conversation and revokes proposals, but is not a data-erasure operation.
 same graph approval/reservation nodes without calling a model. The conflict fixture
 creates a competing booking owned by a synthetic session. These local-only product
 scenarios intentionally write demo data and are not production administrative APIs.
+
+### Proposal-time availability
+
+The live assistant validates availability before persisting a proposal and returns
+a grounded unavailable-room response with alternatives when the requested room
+is occupied. That branch ends without another model call or a pending proposal.
+This is an advisory check, not a hold: approval still relies on PostgreSQL's exclusion
+constraint, and a room taken during the pause produces the conflict path.

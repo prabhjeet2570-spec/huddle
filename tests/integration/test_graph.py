@@ -96,3 +96,35 @@ def test_no_alternatives_means_no_fallback_booking(api):
         ).status_code
         == 409
     )
+
+
+def test_model_cannot_propose_an_already_occupied_room(api, monkeypatch):
+    import json
+
+    import httpx
+
+    proposed = start(api, "conflict")
+    monkeypatch.setenv("OPENROUTER_API_KEY", "test-placeholder")
+
+    def model(self, url, **kwargs):
+        message = {
+            "tool_calls": [
+                {
+                    "id": "occupied",
+                    "type": "function",
+                    "function": {
+                        "name": "propose_booking",
+                        "arguments": json.dumps(proposed["arguments"]),
+                    },
+                }
+            ]
+        }
+        return httpx.Response(
+            200, request=httpx.Request("POST", url), json={"choices": [{"message": message}]}
+        )
+
+    monkeypatch.setattr(httpx.Client, "post", model)
+    result = api("POST", "/assistant/chat", json={"message": "Cedar only, please"})
+    assert result.status_code == 200 and result.json()["proposal"] is None
+    assert result.json()["outcome"] == "unavailable"
+    assert api("GET", "/bookings").json() == []
