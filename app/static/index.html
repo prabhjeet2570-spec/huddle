@@ -4,7 +4,7 @@
     <link rel="icon" type="image/svg+xml" href="/static/favicon.svg" />
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Huddle — a little room for great ideas</title>
+    <title>Huddle — Study room bookings</title>
     <link rel="stylesheet" href="/static/styles.css" />
     <script src="/static/app.js" defer></script>
   </head>
@@ -18,7 +18,7 @@
       <div class="workspace">
         <div class="workspace-avatar">S</div>
         <div>
-          <b>Studio workspace</b><small>Local demo · single workspace</small>
+          <b>Study rooms</b><small>Three sample rooms</small>
         </div>
       </div>
       <span class="nav-label">WORKSPACE</span>
@@ -30,14 +30,10 @@
         ><button class="nav" data-page="assistant">
           <span>✧</span> Huddle assistant <i>AI</i></button
         ><button class="nav" data-page="reliability">
-          <span>⌁</span> Reliability
+          <span>⌁</span> Booking activity
         </button>
       </nav>
       <div class="sidebar-bottom">
-        <div class="sidebar-note">
-          <span class="tiny-dot"></span> A little room for great ideas.
-          <p>Thoughtful spaces.<br />Fewer scheduling headaches.</p>
-        </div>
         <button id="profile" class="profile">
           <span id="avatar">M</span>
           <div>
@@ -61,51 +57,15 @@
         <section class="page" id="discover">
           <div class="page-heading">
             <div>
-              <p class="eyebrow">MAKE SPACE FOR WHAT MATTERS</p>
-              <h1 id="greeting">Your next great idea starts here.</h1>
+              <p class="eyebrow">ROOM AVAILABILITY</p>
+              <h1 id="greeting">Find a study room</h1>
               <p>
-                Find the right space. Bring your people. We’ll handle the room.
+                Choose a time and group size to see available rooms.
               </p>
             </div>
             <button class="button secondary" id="ask-assistant">
               ✧ Ask Huddle
             </button>
-          </div>
-          <div class="hero">
-            <div class="hero-copy">
-              <span class="hero-tag">A BETTER WAY TO GET TOGETHER</span>
-              <h2>Less back-and-forth.<br />More face-to-face.</h2>
-              <p>
-                A quiet corner or a big collaboration.<br />There’s a space for
-                your kind of meeting.
-              </p>
-              <span class="hero-foot"
-                >● &nbsp; Three spaces. One shared calendar.</span
-              >
-            </div>
-            <div class="hero-art" aria-hidden="true">
-              <div class="orbit orbit-one"></div>
-              <div class="orbit orbit-two"></div>
-              <div class="art-window">
-                <div></div>
-                <div></div>
-                <div></div>
-                <div></div>
-              </div>
-              <div class="art-table"></div>
-              <div class="art-chair chair-one"></div>
-              <div class="art-chair chair-two"></div>
-              <div class="art-chair chair-three"></div>
-              <div class="plant">✳</div>
-              <div class="floating-card">
-                <span>✓</span>
-                <div>
-                  Room for your next idea<small
-                    >Made for working together</small
-                  >
-                </div>
-              </div>
-            </div>
           </div>
           <form id="search-form" class="search-bar">
             <label
@@ -136,37 +96,25 @@
                 <option value="12">12 people</option>
               </select></label
             ><button class="button primary" type="submit">
-              Find a space <span>↗</span>
+              Search rooms <span>↗</span>
             </button>
           </form>
           <div class="section-heading">
             <div>
-              <h2>Spaces to come together <span id="room-count">3</span></h2>
+              <h2>Rooms <span id="room-count">3</span></h2>
               <p id="search-caption">Choose a time to see what’s available.</p>
             </div>
             <span class="timezone"></span>
           </div>
           <div id="rooms" class="room-grid"></div>
-          <div class="info-strip">
-            <div class="info-icon">✓</div>
-            <div>
-              <b>One room. One reservation.</b>
-              <p>
-                Availability is checked again when you book, so your team has a
-                space to call its own.
-              </p>
-            </div>
-            <button class="text-button" data-page="reliability">
-              See how it works →
-            </button>
-          </div>
+          <p class="availability-note">Availability can change before you confirm a booking.</p>
         </section>
         <section class="page hidden" id="bookings">
           <div class="page-heading">
             <div>
-              <p class="eyebrow">YOUR TIME, WELL PLANNED</p>
+              <p class="eyebrow">RESERVATIONS</p>
               <h1>My bookings</h1>
-              <p>Everything on your calendar, with a little more clarity.</p>
+              <p>View, change, or cancel your room reservations.</p>
             </div>
             <button class="button primary" data-page="discover">
               + Book a room
@@ -174,7 +122,7 @@
           </div>
           <div class="tabs">
             <button class="tab active" data-filter="confirmed">
-              Upcoming & confirmed</button
+              Confirmed</button
             ><button class="tab" data-filter="cancelled">Cancelled</button>
           </div>
           <div id="booking-list"></div>
@@ -182,8 +130,8 @@
         <section class="page hidden" id="assistant">
           <div class="page-heading">
             <div>
-              <p class="eyebrow">LOCAL DEMO · POWERED BY LANGGRAPH</p>
-              <h1>Your study session, sorted.</h1>
+              <p class="eyebrow">ROOM BOOKING ASSISTANT</p>
+              <h1>Ask Huddle</h1>
               <p>
                 Describe what you need. Review every booking before it happens.
               </p>
@@ -193,10 +141,10 @@
             >
           </div>
           <div class="demo-strip">
-            <div><b>Try the workflow</b><p>Fictional rooms. Real database safeguards. Guided scenarios use no model tokens.</p></div>
-            <button class="button secondary" data-demo="booking">1 · Book a room</button>
-            <button class="button secondary" data-demo="conflict">2 · Handle a conflict</button>
-            <button class="button secondary" data-demo="restart">3 · Pause &amp; resume</button>
+            <div><b>Try a sample booking</b><p>Sample rooms and scripted scenarios. No API key needed.</p></div>
+            <button class="button secondary" data-demo="booking">Book a room</button>
+            <button class="button secondary" data-demo="conflict">Room becomes unavailable</button>
+            <button class="button secondary" data-demo="restart">Return to a saved request</button>
           </div>
           <div class="assistant-layout">
             <div class="chat-panel">
@@ -204,12 +152,12 @@
                 <span class="assistant-orb">✧</span>
                 <div>
                   <b>Huddle assistant</b
-                  ><small>Find a space. Make a plan.</small>
+                  ><small>Search rooms and prepare a reservation.</small>
                 </div>
                 <button class="button secondary" id="reset-chat">
                   New chat
                 </button>
-                <span class="badge">You’re in control</span>
+
               </div>
               <div id="chat-messages" class="chat-messages"></div>
               <div id="proposal"></div>
@@ -231,35 +179,19 @@
                 </button>
               </form>
               <p class="chat-disclaimer">
-                Messages go to the configured model through OpenRouter. Booking
-                requires your approval.
+                Chat messages are sent to the AI provider. Check the room and time before approving.
               </p>
             </div>
             <aside class="assistant-notes">
               <div class="note-card workflow-card" aria-live="polite">
-                <p class="eyebrow">WORKFLOW · POSTGRESQL CHECKPOINT</p>
+                <p class="eyebrow">YOUR REQUEST</p>
                 <div id="workflow-state">Start a conversation or a guided demo.</div>
-                <button class="button secondary" id="refresh-workflow">Refresh workflow</button>
-              </div>
-              <div class="note-card">
-                <span class="note-symbol">✧</span>
-                <h3>A thoughtful copilot.</h3>
-                <p>
-                  Tell Huddle your time, group size, and what you have in mind.
-                </p>
-                <button class="suggestion">
-                  Find a room for 4 tomorrow at 10am for an hour</button
-                ><button class="suggestion">Show my bookings</button>
+                <button class="button secondary" id="refresh-workflow">Refresh status</button>
               </div>
               <div class="note-card plain">
-                <h3>Always your call.</h3>
-                <p>
-                  The assistant can suggest a booking. Only your approval can
-                  reserve the room.
-                </p>
-                <div class="step"><span>1</span> Describe your meeting</div>
-                <div class="step"><span>2</span> Review the exact details</div>
-                <div class="step"><span>3</span> Approve and book</div>
+                <h3>Example requests</h3>
+                <button class="suggestion">Find a room for 4 tomorrow at 10am for an hour</button>
+                <button class="suggestion">Show my bookings</button>
               </div>
             </aside>
           </div>
@@ -267,71 +199,40 @@
         <section class="page hidden" id="reliability">
           <div class="page-heading">
             <div>
-              <p class="eyebrow">CONFIDENCE, BUILT IN</p>
-              <h1>Behind every booking.</h1>
-              <p>Real workflow state. Visible recovery. No hidden failures.</p>
+              <p class="eyebrow">RESERVATION STATUS</p>
+              <h1>Booking activity</h1>
+              <p>Track your reservations and calendar updates.</p>
             </div>
             <span class="badge neutral" id="worker-status"
               >Checking worker</span
             >
           </div>
           <div class="metrics" id="metrics"></div>
+          <details class="technical-details"><summary>Calendar diagnostics</summary><p id="sync-diagnostics"></p></details>
           <div class="reliability-grid">
             <div class="panel">
               <div class="panel-heading">
-                <h2>Activity & recovery</h2>
-                <span class="badge neutral">Live records</span>
+                <h2>Recent activity</h2>
+
               </div>
               <div id="activity"></div>
             </div>
             <div class="panel principles">
-              <p class="eyebrow">DESIGNED TO RECOVER</p>
-              <h2>A booked room<br />stays booked.</h2>
-              <p>
-                If the calendar is unavailable, your room allocation stays
-                intact. A separate worker retries synchronization.
-              </p>
-              <div class="principle">
-                <span>01</span>
-                <div>
-                  <b>Database-enforced allocation</b>
-                  <p>Overlapping reservations are rejected by PostgreSQL.</p>
-                </div>
-              </div>
-              <div class="principle">
-                <span>02</span>
-                <div>
-                  <b>Durable work queue</b>
-                  <p>Pending work survives an application or worker restart.</p>
-                </div>
-              </div>
-              <div class="principle">
-                <span>03</span>
-                <div>
-                  <b>Versioned calendar writes</b>
-                  <p>Retries reconcile one event per booking.</p>
-                </div>
-              </div>
-              <p class="small-note">
-                Calendar events use a separate HTTP simulator. Metrics describe
-                this workspace, not production reliability.
-              </p>
+              <h2>Calendar updates</h2>
+              <p>Your reservation is confirmed independently of the calendar update. If an update fails, the room stays reserved.</p>
+              <p>If a booking shows “Update needs attention,” open My bookings and choose Retry update.</p>
+              <p class="small-note">This demo uses a simulated calendar. It does not create events in your personal calendar.</p>
             </div>
           </div>
         </section>
-        <footer>
-          <span
-            >huddle.
-            <span class="footer-light">Make room for good work.</span></span
-          ><span>Built with care · PostgreSQL + FastAPI</span>
-        </footer>
+        <footer><span>Huddle</span><span>Local demo · fictional rooms</span></footer>
       </div>
     </main>
     <dialog id="booking-dialog">
       <form id="booking-form">
         <div class="dialog-heading">
           <div>
-            <p class="eyebrow" id="dialog-eyebrow">MAKE IT HAPPEN</p>
+            <p class="eyebrow" id="dialog-eyebrow">RESERVATION DETAILS</p>
             <h2 id="dialog-title">Book your space</h2>
           </div>
           <button
@@ -344,10 +245,10 @@
           </button>
         </div>
         <label
-          >Meeting title<input
+          >Booking title<input
             id="meeting-title"
             maxlength="100"
-            value="Team catch-up"
+            value="Study session"
             required /></label
         ><label
           >Room<select id="meeting-room">
@@ -376,8 +277,7 @@
             required
         /></label>
         <div class="booking-note">
-          ✓ Your room is reserved immediately. Calendar synchronization follows
-          separately.
+          Your room is reserved once this form is successfully submitted.
         </div>
         <p class="form-error" id="booking-error" role="alert"></p>
         <button class="button primary full" id="save-booking" type="submit">
@@ -412,8 +312,8 @@
     <dialog id="session-dialog">
       <div class="welcome-mark">h.</div>
       <p class="eyebrow">WELCOME TO HUDDLE</p>
-      <h2>Good work starts<br />with a little space.</h2>
-      <p>Enter the demo workspace to find rooms and manage your meetings.</p>
+      <h2>Open your demo session</h2>
+      <p>Use a display name to try booking the sample rooms.</p>
       <form id="session-form">
         <label
           >Your display name<input
@@ -424,8 +324,7 @@
         ><button class="button primary full">Enter workspace →</button>
       </form>
       <small
-        >This creates a private browser session, not a verified account. Use a
-        demo name.</small
+        >Bookings are saved to this browser session. Use a demo name.</small
       >
     </dialog>
     <dialog id="profile-dialog">

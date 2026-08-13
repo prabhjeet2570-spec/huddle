@@ -1,0 +1,115 @@
+{
+  "recorded_at": "2026-10-05T03:43:11.276787+00:00",
+  "commit": "5b25d5401e92396e05c139c123b4a5738a03b159",
+  "python": "3.12.13",
+  "machine": "arm64",
+  "database": "PostgreSQL",
+  "calendar": "independent HTTP simulator with SQLite storage",
+  "scope": "synthetic workload; no live model or real calendar provider",
+  "trials": [
+    {
+      "fault": "response_lost",
+      "process_exit": null,
+      "interrupted_job": {
+        "state": "pending",
+        "attempts": 1
+      },
+      "attempts": 2,
+      "calendar_events": 1,
+      "reservation_status": "confirmed",
+      "calendar_status": "synced",
+      "elapsed_seconds": 7.364
+    },
+    {
+      "fault": "before_remote",
+      "process_exit": 71,
+      "interrupted_job": {
+        "state": "processing",
+        "attempts": 1
+      },
+      "attempts": 2,
+      "calendar_events": 1,
+      "reservation_status": "confirmed",
+      "calendar_status": "synced",
+      "elapsed_seconds": 30.843
+    },
+    {
+      "fault": "after_remote",
+      "process_exit": 72,
+      "interrupted_job": {
+        "state": "processing",
+        "attempts": 1
+      },
+      "attempts": 2,
+      "calendar_events": 1,
+      "reservation_status": "confirmed",
+      "calendar_status": "synced",
+      "elapsed_seconds": 30.574
+    },
+    {
+      "fault": "after_ack",
+      "process_exit": 73,
+      "interrupted_job": {
+        "state": "done",
+        "attempts": 1
+      },
+      "attempts": 1,
+      "calendar_events": 1,
+      "reservation_status": "confirmed",
+      "calendar_status": "synced",
+      "elapsed_seconds": 0.763
+    }
+  ],
+  "contention": {
+    "attempts": 24,
+    "created": 1,
+    "conflicts": 23,
+    "unexpected_errors": 0,
+    "latencies_ms": [
+      192.281,
+      182.628,
+      189.538,
+      178.225,
+      181.652,
+      200.012,
+      201.837,
+      192.494,
+      200.499,
+      215.828,
+      184.619,
+      185.157,
+      199.577,
+      204.41,
+      205.061,
+      199.927,
+      204.336,
+      212.378,
+      215.218,
+      203.974,
+      193.458,
+      213.22,
+      202.901,
+      211.401
+    ]
+  },
+  "idempotency": {
+    "attempts": 12,
+    "logical_bookings": 1,
+    "latencies_ms": [
+      138.696,
+      144.041,
+      140.133,
+      134.586,
+      120.523,
+      123.876,
+      135.42,
+      144.489,
+      125.749,
+      128.498,
+      140.493,
+      130.618
+    ]
+  },
+  "overlapping_active_pairs": 0,
+  "unresolved_jobs": 0
+}

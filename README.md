@@ -71,7 +71,7 @@ on the same ports.
 3. Reschedule it or cancel it. The previous slot is released transactionally.
 4. Ask the assistant: “Prepare a proposal for Cedar tomorrow 10–11am, four people,
    titled Weekly planning.” Review the exact local time and approve.
-5. Open **Reliability** to inspect the actual workflow records, retry counts,
+5. Open **Booking activity** to inspect the actual workflow records, retry counts,
    worker heartbeat, and synchronization latency.
 
 ![LangGraph approval pause in the local scripted demo](docs/screenshots/langgraph.jpg)
@@ -82,10 +82,10 @@ Open **Huddle assistant** and choose a scenario:
 
 1. **Book a room:** creates a scripted proposal and pauses the real graph. Click
    **Approve & book**; the workflow panel changes to confirmed.
-2. **Handle a conflict:** a simulated student takes the proposed room. Approval
+2. **Room becomes unavailable:** a simulated student takes the proposed room. Approval
    returns a conflict; select **Review Maple** or another offered room, then approve
    the new proposal. No fallback reservation happens without fresh approval.
-3. **Pause & resume:** prepare a proposal, restart only the API, refresh the same
+3. **Return to a saved request:** prepare a proposal, restart only the API, refresh the same
    browser session, and approve within five minutes. The pending graph is restored
    from PostgreSQL. Repeated approval returns the same booking.
 
@@ -95,7 +95,8 @@ These controls use deterministic fixtures, not LLM-generated responses. Use the
 chat box to exercise the live OpenRouter model. Both paths share the approval and
 reservation graph nodes. Fixtures leave synthetic reservations in the local DB.
 
-The workflow panel shows the recorded steps and current approval state. On small
+The request panel shows approval status and alternatives. Optional **Demo internals**
+reveals the recorded graph steps. On small
 screens it appears below the chat. Existing pending proposals from the pre-LangGraph
 version are invalidated by migration 004; existing bookings remain intact.
 
@@ -132,7 +133,7 @@ HTML/CSS/JavaScript UI. PostgreSQL stores reservations, approvals, graph checkpo
 histories, usage records, and pending work. The independent HTTP calendar simulator
 stores events in SQLite.
 
-More detail: [architecture and boundaries](docs/architecture.md).
+More detail: [architecture and boundaries](docs/architecture.md), [interface decisions](docs/ui.md).
 
 ## Stack
 
@@ -144,7 +145,7 @@ reproducible development. LangSmith tracing is not required.
 
 ## Measured evidence
 
-The current suite passes 57 tests. A [separate-process restart experiment](artifacts/workflow-restart.json)
+The current suite passes 59 tests. A [separate-process restart experiment](artifacts/workflow-restart.json)
 restores an approval checkpoint and verifies repeated approval creates one booking.
 Run it with `TEST_DATABASE_URL=.../huddle_test uv run python scripts/workflow_demo.py`.
 

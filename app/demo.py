@@ -84,9 +84,9 @@ def demo(body: DemoInput, user=Depends(current_user)):
             ends_at=start + timedelta(hours=1),
         ).model_dump(mode="json")
         messages = {
-            "booking": "Scripted demo: this prepared proposal uses the real LangGraph approval interrupt. Approve it to create a demo reservation. No model call is used.",
-            "conflict": "Scripted demo: another simulated student takes Cedar after your proposal is prepared. Approve to see the conflict and choose an alternative. No model call is used.",
-            "restart": "Scripted demo: your workflow is checkpointed in PostgreSQL. Restart the API, refresh this page in the same browser session, then approve within five minutes. No model call is used.",
+            "booking": "Sample booking: review the details, then approve to reserve this room.",
+            "conflict": "Sample conflict: another student has taken Cedar. Try approving this request to see the available alternatives.",
+            "restart": "Saved-request demo: this proposal will still be here after restarting the app. Return in the same browser and approve within five minutes.",
         }
         result = pause_proposal(conn, user, arguments, messages[body.scenario])
         if body.scenario == "conflict":

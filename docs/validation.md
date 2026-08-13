@@ -113,3 +113,23 @@ and the proposal handler canonicalizes case/whitespace only for known catalog ID
 Unknown rooms remain invalid. The repeated live request produced Birch, five
 attendees, October 11, 2–3 PM local time, and approval created the reservation.
 The suite now passes **58 tests**, including the capitalization regression.
+
+The broader live set then exposed an occupied-room proposal: the booking constraint
+would reject approval, but the proposal misleadingly offered an already busy room.
+The handler now checks availability before saving a proposal. Returning a tool
+error to the model still caused repeated calls in the first rerun (12/13 passed),
+so an occupied-room response now ends deterministically with available alternatives
+and no pending proposal. The final live rerun passed all **13 scenarios**; the raw
+results replace `artifacts/assistant-evaluation.json`. This does not hold a room;
+approval still checks for later conflicts.
+The occupied-room regression brings the automated suite to **59 passing tests**.
+
+Browser checks covered search, direct create, reschedule, cancellation/history,
+live model proposal and approval, competing-room alternatives, dismissal, and
+New chat. New chat now clears request status as well as chat/proposal; a fresh
+session refreshes the active page. Booking lists refresh calendar status periodically.
+Changing a URL fragment now switches the visible page as well.
+The running API returned 200 for health, readiness, rooms, and assistant status.
+All four real HTTP/crash recovery trials passed again; raw results are saved in
+`artifacts/ui-recovery-results.json` without replacing the original recovery record.
+The screenshot set was refreshed to show the revised UI.
