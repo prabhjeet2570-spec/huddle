@@ -5,6 +5,7 @@ from uuid import UUID
 
 from app.assistant import approve
 from app.db import connect
+from app.rooms import ROOMS
 
 
 def start(api, scenario="booking"):
@@ -30,7 +31,9 @@ def test_conflict_offers_new_proposal_without_silent_booking(api):
     response = api("POST", f"/assistant/proposals/{proposal['id']}/approve")
     assert response.status_code == 409
     assert api("GET", "/bookings").json() == []
-    assert {r["id"] for r in response.json()["alternatives"]} == {"maple", "birch"}
+    assert {r["id"] for r in response.json()["alternatives"]} == {
+        r.id for r in ROOMS if r.id != "cedar" and r.capacity >= proposal["arguments"]["attendees"]
+    }
     state = api("GET", "/assistant/workflow").json()["workflow"]
     assert state["status"] == "conflict" and not state["next"]
     alternative = api(
@@ -84,12 +87,16 @@ def test_reset_leaves_no_resumable_action(api):
 
 def test_no_alternatives_means_no_fallback_booking(api):
     proposal = start(api, "conflict")
-    for room in ("maple", "birch"):
+    for room in (
+        r.id for r in ROOMS if r.id != "cedar" and r.capacity >= proposal["arguments"]["attendees"]
+    ):
         response = api("POST", "/bookings", json={**proposal["arguments"], "room_id": room})
         assert response.status_code == 201
     response = api("POST", f"/assistant/proposals/{proposal['id']}/approve")
     assert response.status_code == 409 and response.json()["alternatives"] == []
-    assert len(api("GET", "/bookings").json()) == 2
+    assert len(api("GET", "/bookings").json()) == sum(
+        r.id != "cedar" and r.capacity >= proposal["arguments"]["attendees"] for r in ROOMS
+    )
     assert (
         api(
             "POST", f"/assistant/proposals/{proposal['id']}/alternative", json={"room_id": "maple"}

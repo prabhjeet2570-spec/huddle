@@ -7,6 +7,7 @@ import pytest
 
 from app.db import connect
 from app.main import app
+from app.rooms import ROOMS
 
 
 def payload(**changes):
@@ -116,7 +117,7 @@ def test_availability_schedule_and_adjacency(api):
     b = api("POST", "/bookings", json=p).json()
     params = {k: p[k] for k in ("starts_at", "ends_at")}
     rooms = api("GET", "/availability", params=params).json()["rooms"]
-    assert {r["id"] for r in rooms} == {"maple", "birch"}
+    assert {r["id"] for r in rooms} == {r.id for r in ROOMS if r.id != "cedar" and r.capacity >= 2}
     schedule = api("GET", "/rooms/cedar/schedule", params=params).json()
     assert schedule["free_windows"] == []
     assert set(schedule["bookings"][0]) == {"starts_at", "ends_at"}
@@ -127,7 +128,7 @@ def test_availability_schedule_and_adjacency(api):
     }
     assert api("POST", "/bookings", json=adjacent).status_code == 201
     api("POST", "/bookings/" + b["id"] + "/cancel", headers={"If-Match": "1"})
-    assert len(api("GET", "/availability", params=params).json()["rooms"]) == 3
+    assert len(api("GET", "/availability", params=params).json()["rooms"]) == len(ROOMS)
 
 
 def test_csrf_origin_rejected(api):

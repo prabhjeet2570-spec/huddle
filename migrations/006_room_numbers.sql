@@ -1,0 +1,25 @@
+-- Clear room numbers replace the initial placeholder display names.
+UPDATE room_catalog SET name='Room 101' WHERE id='cedar';
+UPDATE room_catalog SET name='Room 102' WHERE id='maple';
+UPDATE room_catalog SET name='Room 103' WHERE id='birch';
+UPDATE room_catalog SET name='Room 104' WHERE id='willow';
+UPDATE room_catalog SET name='Room 105' WHERE id='aspen';
+UPDATE room_catalog SET name='Room 106' WHERE id='fern';
+UPDATE room_catalog SET name='Room 201' WHERE id='elm';
+UPDATE room_catalog SET name='Room 202' WHERE id='sage';
+UPDATE room_catalog SET name='Room 203' WHERE id='ivy';
+UPDATE room_catalog SET name='Room 204' WHERE id='oak';
+UPDATE room_catalog SET name='Room 205' WHERE id='pine';
+UPDATE room_catalog SET name='Room 206' WHERE id='hazel';
+UPDATE room_catalog SET name='Room 301' WHERE id='alder';
+UPDATE room_catalog SET name='Room 302' WHERE id='laurel';
+UPDATE room_catalog SET name='Room 303' WHERE id='olive';
+UPDATE room_catalog SET name='Room 304' WHERE id='juniper';
+UPDATE room_catalog SET name='Room 305' WHERE id='magnolia';
+UPDATE room_catalog SET name='Room 306' WHERE id='sequoia';
+UPDATE room_catalog SET name='Room 401' WHERE id='cypress';
+UPDATE room_catalog SET name='Room 402' WHERE id='grove';
+UPDATE room_catalog SET name='Room 403' WHERE id='atrium';
+UPDATE room_catalog SET name='Room 404' WHERE id='forum';
+UPDATE room_catalog SET name='Room 405' WHERE id='studio';
+UPDATE room_catalog SET name='Room 406' WHERE id='loft';

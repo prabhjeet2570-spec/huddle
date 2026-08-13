@@ -156,3 +156,12 @@ a grounded unavailable-room response with alternatives when the requested room
 is occupied. That branch ends without another model call or a pending proposal.
 This is an advisory check, not a hold: approval still relies on PostgreSQL's exclusion
 constraint, and a room taken during the pause produces the conflict path.
+
+### Expanded room catalog
+
+Discovery exposes 24 numbered rooms on four floors, with capacities from 2 to 30.
+Display names and floor metadata come from `app/rooms.py`; assistant tool enums
+and its prompt use that same catalog. Internal IDs remain stable so existing
+bookings are preserved. Migration 005 replaces the three-room SQL check with a
+catalog foreign key and a capacity trigger; migration 006 gives the rooms clear
+numbers. A regression check verifies the SQL and application catalog agree.

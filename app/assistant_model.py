@@ -8,6 +8,7 @@ import httpx
 
 from app.availability import AvailabilityQuery
 from app.bookings import BookingRequest
+from app.rooms import ROOMS
 
 
 def tool(name, description, schema):
@@ -18,7 +19,7 @@ def tool(name, description, schema):
 
 
 BOOKING_SCHEMA = BookingRequest.model_json_schema()
-BOOKING_SCHEMA["properties"]["room_id"]["enum"] = ["cedar", "maple", "birch"]
+BOOKING_SCHEMA["properties"]["room_id"]["enum"] = [room.id for room in ROOMS]
 
 TOOLS = [
     tool(
@@ -42,7 +43,7 @@ TOOLS = [
 def system_prompt(timezone):
     zone = ZoneInfo(timezone)
     return f"""You are Huddle, a concise meeting-room assistant. Current local time is {datetime.now(zone).isoformat()}.
-User timezone: {timezone}. Rooms: Cedar (ID cedar, 4 people), Maple (ID maple, 8), Birch (ID birch, 12).
+User timezone: {timezone}. Rooms: {", ".join(f"{r.name} (ID {r.id}, {r.capacity} people)" for r in ROOMS)}.
 Tool room_id values must be the lowercase IDs, never display names.
 Ask only for missing time, duration, or attendee details; reuse details already given.
 Use tools for actual availability. Once room, start, end and attendees are known, call propose_booking immediately.

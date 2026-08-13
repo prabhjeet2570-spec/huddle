@@ -20,27 +20,19 @@ def test_room_catalog():
     response = get_rooms()
 
     assert response.status_code == 200
-    assert response.json() == [
-        {"id": "cedar", "name": "Cedar", "capacity": 4},
-        {"id": "maple", "name": "Maple", "capacity": 8},
-        {"id": "birch", "name": "Birch", "capacity": 12},
-    ]
+    catalog = response.json()
+    assert len(catalog) == 24
+    assert len({r["id"] for r in catalog}) == 24
+    assert min(r["capacity"] for r in catalog) == 2
+    assert max(r["capacity"] for r in catalog) == 30
 
 
-@pytest.mark.parametrize(
-    ("capacity", "expected_ids"),
-    [
-        (4, ["cedar", "maple", "birch"]),
-        (5, ["maple", "birch"]),
-        (12, ["birch"]),
-        (13, []),
-    ],
-)
-def test_minimum_capacity_filter(capacity, expected_ids):
+@pytest.mark.parametrize("capacity", [2, 4, 5, 12, 13, 24, 30, 31])
+def test_minimum_capacity_filter(capacity):
     response = get_rooms(f"?min_capacity={capacity}")
-
     assert response.status_code == 200
-    assert [room["id"] for room in response.json()] == expected_ids
+    expected = [r for r in get_rooms().json() if r["capacity"] >= capacity]
+    assert response.json() == expected
 
 
 @pytest.mark.parametrize("capacity", ["0", "-1", "many", "2.5"])
