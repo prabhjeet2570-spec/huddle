@@ -69,23 +69,24 @@ on the same ports.
 2. Book a room and open **My bookings → Activity**. The reservation is immediate;
    calendar synchronization completes independently.
 3. Reschedule it or cancel it. The previous slot is released transactionally.
-4. Ask the assistant: “Prepare a proposal for Cedar tomorrow 10–11am, four people,
+4. Ask the assistant: “Prepare a proposal for Room 101 tomorrow 10–11am, four people,
    titled Weekly planning.” Review the exact local time and approve.
-5. Open **Booking activity** to inspect the actual workflow records, retry counts,
-   worker heartbeat, and synchronization latency.
+5. Open **Booking activity** to see reservation and calendar update history.
+   Use **Past** and **Cancelled** in My bookings to browse previous reservations.
 
-![LangGraph approval pause in the local scripted demo](docs/screenshots/langgraph.jpg)
+![In-page assistant proposal](docs/screenshots/chat-proposal.jpg)
 
 ## Guided LangGraph demo (no API key)
 
-Open **Huddle assistant** and choose a scenario:
+Open **Ask Huddle** from Find a room, expand **Try a request → Sample flows without
+an API key**, and choose a scenario:
 
-1. **Book a room:** creates a scripted proposal and pauses the real graph. Click
+1. **Prepare a booking:** creates a scripted proposal and pauses the real graph. Click
    **Approve & book**; the workflow panel changes to confirmed.
-2. **Room becomes unavailable:** a simulated student takes the proposed room. Approval
-   returns a conflict; select **Review Maple** or another offered room, then approve
+2. **Try a room conflict:** a simulated student takes the proposed room. Approval
+   returns a conflict; select **Review Room 102** or another offered room, then approve
    the new proposal. No fallback reservation happens without fresh approval.
-3. **Return to a saved request:** prepare a proposal, restart only the API, refresh the same
+3. **Prepare a saved request:** prepare a proposal, restart only the API, refresh the same
    browser session, and approve within five minutes. The pending graph is restored
    from PostgreSQL. Repeated approval returns the same booking.
 
@@ -99,6 +100,18 @@ The request panel shows approval status and alternatives. Optional **Demo intern
 reveals the recorded graph steps. On small
 screens it appears below the chat. Existing pending proposals from the pre-LangGraph
 version are invalidated by migration 004; existing bookings remain intact.
+
+## Populated sample profiles
+
+For a fuller walkthrough, set `HUDDLE_DEMO_PROFILES=true` locally and restart the
+API. **Viewing as** switches between Blake, Morgan, Jake and Ashley. Each has twelve
+future sample bookings plus one historical fixture, with cancellations, changes,
+calendar failures and successful retries. Availability is shared while booking
+access remains scoped to the selected profile. This is a local demo shortcut;
+it is disabled by default and must not be used as authentication.
+
+[Data setup and fault scenarios](docs/demo-data.md) explain how to reproduce the
+sample data, which clocks were accelerated, and why pending states change over time.
 
 ## Engineering decisions
 
@@ -145,7 +158,7 @@ reproducible development. LangSmith tracing is not required.
 
 ## Measured evidence
 
-The current suite passes 59 tests. A [separate-process restart experiment](artifacts/workflow-restart.json)
+The current suite passes 68 tests. A [separate-process restart experiment](artifacts/workflow-restart.json)
 restores an approval checkpoint and verifies repeated approval creates one booking.
 Run it with `TEST_DATABASE_URL=.../huddle_test uv run python scripts/workflow_demo.py`.
 
@@ -170,7 +183,7 @@ by run. There is no claim of exhaustive fault coverage or a measured improvement
 over a prior baseline.
 
 The live OpenRouter walkthrough reached a correct proposal and an approved booking.
-A subsequent [13-scenario live evaluation](artifacts/assistant-evaluation.json) passed
+A subsequent [16-scenario live evaluation](artifacts/assistant-evaluation.json) passed
 its scripted checks for interpretation, clarification, proposal edits, occupied rooms,
 and approval boundaries. See [scope and reproduction](docs/validation.md#live-model-check).
 This small curated set is not a general task-completion benchmark; review every proposal.
@@ -197,7 +210,7 @@ uv run pytest -q
 uv run python scripts/recovery_demo.py
 ```
 
-The validated suite has **50 passing cases**, including actual PostgreSQL
+The validated suite has **68 passing cases**, including actual PostgreSQL
 contention, direct constraint enforcement, owner isolation, exact-action approval,
 lease recovery, and retry exhaustion. The recovery script deliberately exits
 worker subprocesses, waits for real lease expiry, and overwrites the raw results
@@ -207,7 +220,54 @@ GitHub Actions runs lint, formatting, the full database-backed suite, recovery
 experiment, JavaScript syntax validation, and a container build. Recovery output
 is uploaded as a CI artifact.
 
-![Workflow history and synchronization metrics](docs/screenshots/reliability.jpg)
+## UI walkthrough
+
+Screenshots show the actual local app with sample data. Open a disclosure for each
+view; they include successful and failed update states rather than only empty pages.
+
+<details><summary>Fourth-floor spaces and room sizes</summary>
+
+![Fourth-floor rooms](docs/screenshots/fourth-floor.jpg)
+
+![Sixteen-person search on floor three](docs/screenshots/group-size-search.jpg)
+
+</details>
+<details><summary>Assistant confirms the booked room</summary>
+
+![Confirmed Room 306 booking](docs/screenshots/chat-confirmed.jpg)
+
+![Conflicting reservation with alternatives](docs/screenshots/chat-conflict.jpg)
+
+</details>
+<details><summary>Morgan’s upcoming reservations</summary>
+
+![Morgan bookings](docs/screenshots/bookings.jpg)
+
+</details>
+<details><summary>Blake, Jake and Ashley</summary>
+
+![Blake bookings](docs/screenshots/blake-bookings.jpg)
+![Jake bookings](docs/screenshots/jake-bookings.jpg)
+![Ashley bookings](docs/screenshots/ashley-bookings.jpg)
+
+</details>
+<details><summary>Past and cancelled bookings</summary>
+
+![Historical sample booking](docs/screenshots/past-bookings.jpg)
+![Cancelled bookings](docs/screenshots/cancelled-bookings.jpg)
+
+</details>
+<details><summary>Calendar failures and retry activity</summary>
+
+![Booking activity with pending and failed updates](docs/screenshots/reliability.jpg)
+
+</details>
+<details><summary>Mobile directory and assistant</summary>
+
+![Mobile room discovery](docs/screenshots/mobile.jpg)
+![Mobile assistant](docs/screenshots/mobile-chat.jpg)
+
+</details>
 
 ## Boundaries and next steps
 
@@ -224,9 +284,9 @@ is uploaded as a CI artifact.
   Editing and cancellation use the UI. Each turn has at most three model calls,
   four tool calls per model response, and 700 output tokens per call; there is a
   30-turn hourly workspace limit. This is not a public-service abuse defense.
-- **Limited evaluation:** four crash/timeout trials and 13 curated live-model
+- **Limited evaluation:** four crash/timeout trials and 16 curated live-model
   scenarios do not establish production reliability or general language accuracy.
-- **Demo catalog:** three static rooms with illustrative artwork. No real venue,
+- **Demo catalog:** 24 numbered rooms across four floors with illustrative artwork. No real venue,
   organization, user adoption, delivered email, or uptime is claimed.
 - **Deployment:** HTTPS, verified authentication, backup/restore procedures,
   global rate limits, retention policies, and real provider integration are

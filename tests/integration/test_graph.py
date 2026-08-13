@@ -135,3 +135,14 @@ def test_model_cannot_propose_an_already_occupied_room(api, monkeypatch):
     assert result.status_code == 200 and result.json()["proposal"] is None
     assert result.json()["outcome"] == "unavailable"
     assert api("GET", "/bookings").json() == []
+
+
+def test_approval_posts_confirmation_once(api):
+    proposal = start(api)
+    path = f"/assistant/proposals/{proposal['id']}/approve"
+    assert api("POST", path).status_code == 200
+    assert api("POST", path).status_code == 200
+    messages = api("GET", "/assistant/history").json()["messages"]
+    confirmations = [m for m in messages if "Your room is booked." in m["content"]]
+    assert len(confirmations) == 1
+    assert "Room 101" in confirmations[0]["content"]

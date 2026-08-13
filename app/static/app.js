@@ -2,7 +2,10 @@ const $ = (s) => document.querySelector(s),
   $$ = (s) => [...document.querySelectorAll(s)];
 const state = {
   page: "discover",
+  chatOpen: false,
   rooms: [],
+  available: undefined,
+  searchWindow: null,
   bookings: [],
   filter: "confirmed",
   editing: null,
@@ -69,6 +72,7 @@ async function api(path, options = {}) {
   return body;
 }
 function page(name) {
+  if (name === "assistant") { page("discover"); openAssistant(); return; }
   state.page = name;
   $$(".page").forEach((el) => el.classList.toggle("hidden", el.id !== name));
   $$(".nav").forEach((el) =>
@@ -98,30 +102,33 @@ function queryWindow() {
     min_capacity: $("#search-people").value,
   };
 }
-const roomInfo = {
-  cedar: {
-    sub: "Small group study room.",
-    features: ["▧ Whiteboard", "◉ Display", "☀ Daylight"],
-    floor: "Ground floor · East wing",
-  },
-  maple: {
-    sub: "Group study room with video-call equipment.",
-    features: ["▧ Whiteboard", "◉ Video calls", "☀ Daylight"],
-    floor: "First floor · North wing",
-  },
-  birch: {
-    sub: "Large group study room.",
-    features: ["◉ Large display", "◎ Conference", "☀ Daylight"],
-    floor: "First floor · West wing",
-  },
-};
-function renderRooms(available) {
-  $("#room-count").textContent = state.rooms.length;
-  $("#rooms").innerHTML = state.rooms
+const roomName = id => state.rooms.find(r => r.id === id)?.name || id;
+function openAssistant() {
+  state.chatOpen = true;
+  $("#assistant").classList.remove("hidden");
+  $("#chat-launcher").setAttribute("aria-expanded", "true");
+  $("#chat-launcher").classList.add("hidden");
+  loadAssistant();
+}
+function closeAssistant() {
+  state.chatOpen = false;
+  $("#assistant").classList.add("hidden");
+  $("#chat-launcher").setAttribute("aria-expanded", "false");
+  $("#chat-launcher").classList.remove("hidden");
+}
+function renderRooms(available = state.available) {
+  const rooms = state.rooms.filter(r => !$("#room-floor").value || r.floor === Number($("#room-floor").value));
+  $("#room-count").textContent = rooms.length;
+  if (state.searchWindow && available) {
+    const q = state.searchWindow;
+    const count = rooms.filter(r => available.has(r.id)).length;
+    $("#search-caption").textContent = `${count} ${count === 1 ? "space" : "spaces"} available · ${dt(q.starts_at)} – ${tm(q.ends_at)}`;
+  }
+  $("#rooms").innerHTML = rooms
     .map((room) => {
-      const info = roomInfo[room.id],
+      const info = {sub: room.capacity <= 3 ? "A quiet space for focused work." : room.capacity >= 16 ? "Room to spread out with your whole group." : "A comfortable spot for working together.", features: room.capacity <= 3 ? ["Power outlets", "Quiet area"] : ["Whiteboard", "Display", "Power outlets"], floor: `Floor ${room.floor}`},
         free = available?.has(room.id);
-      return `<article class="room-card"><div class="room-image"><img src="/static/${escapeHTML(room.id)}.svg" alt="Illustration of the ${escapeHTML(room.name)} meeting room"><span class="badge ${free === false ? "pending" : ""}">${free === undefined ? "Explore this space" : free ? "● Available" : "Unavailable for this time"}</span></div><div class="room-body"><div class="room-title"><h3>${escapeHTML(room.name)}</h3><span>♙ &nbsp; Up to ${room.capacity}</span></div><p class="room-description">${info.sub}</p><div class="room-features">${info.features.map((f) => `<span>${f}</span>`).join("")}</div><div class="room-bottom"><span>${info.floor}</span><button data-book="${room.id}" ${free === false ? "disabled" : ""}>Book room</button></div></div></article>`;
+      return `<article class="room-card"><div class="room-image"><img src="/static/${room.capacity <= 4 ? "cedar" : room.capacity <= 10 ? "maple" : "birch"}.svg" alt="Illustration of the ${escapeHTML(room.name)} meeting room"><span class="badge ${free === false ? "pending" : ""}">${free === undefined ? "Explore this space" : free ? "Available" : room.capacity < Number($("#search-people").value) ? "Too small for this group" : "Booked for this time"}</span></div><div class="room-body"><div class="room-title"><h3>${escapeHTML(room.name)}</h3><span>♙ &nbsp; Up to ${room.capacity}</span></div><p class="room-description">${info.sub}</p><div class="room-features">${info.features.map((f) => `<span>${f}</span>`).join("")}</div><div class="room-bottom"><span>${info.floor}</span><button data-book="${room.id}" ${free === false ? "disabled" : ""}>Book room</button></div></div></article>`;
     })
     .join("");
 }
@@ -129,9 +136,10 @@ async function search() {
   try {
     const q = queryWindow(),
       data = await api("/availability?" + new URLSearchParams(q));
-    renderRooms(new Set(data.rooms.map((r) => r.id)));
-    $("#search-caption").textContent =
-      `${data.rooms.length} spaces available · ${dt(q.starts_at)} – ${tm(q.ends_at)}`;
+    state.searchWindow = q;
+    state.available = new Set(data.rooms.map((r) => r.id));
+    renderRooms();
+
   } catch (e) {
     toast(e.message);
   }
@@ -140,7 +148,7 @@ async function loadBookings() {
   try {
     state.bookings = await api("/bookings?limit=100");
     $("#booking-count").textContent = state.bookings.filter(
-      (b) => b.status === "confirmed",
+      (b) => b.status === "confirmed" && new Date(b.starts_at) > new Date(),
     ).length;
     renderBookings();
   } catch (e) {
@@ -149,16 +157,16 @@ async function loadBookings() {
   }
 }
 function renderBookings() {
-  const bookings = state.bookings.filter((b) => b.status === state.filter);
+  const bookings = state.bookings.filter(b => state.filter === "past" ? b.status === "confirmed" && new Date(b.starts_at) <= new Date() : b.status === state.filter && (state.filter !== "confirmed" || new Date(b.starts_at) > new Date()));
   $("#booking-list").innerHTML = bookings.length
     ? bookings
         .map((b) => {
           const d = new Date(b.starts_at),
             future = d > new Date();
-          return `<article class="booking-card"><div class="date-box"><small>${d.toLocaleDateString(undefined, { month: "short" })}</small><b>${d.getDate()}</b></div><div class="booking-content"><h3>${escapeHTML(b.title)}</h3><div class="booking-meta">${escapeHTML(b.room_id[0].toUpperCase() + b.room_id.slice(1))} &nbsp;·&nbsp; ${tm(b.starts_at)} – ${tm(b.ends_at)} &nbsp;·&nbsp; ${b.attendees} people</div><div class="booking-badges"><span class="badge ${b.status === "cancelled" ? "cancelled" : ""}">${b.status === "cancelled" ? "Cancelled" : future ? "Confirmed" : "Past booking"}</span><span class="badge ${b.calendar_status === "synced" ? "neutral" : "pending"}">${{ pending: "Calendar update pending", synced: "Calendar updated", needs_review: "Update needs attention" }[b.calendar_status]}</span></div><div id="events-${b.id}" class="hidden history-inline"></div></div><div class="booking-actions"><button class="button secondary" data-events="${b.id}">Activity</button>${b.calendar_status === "needs_review" ? `<button class="button secondary" data-retry="${b.id}">Retry update</button>` : ""}${b.status === "confirmed" && future ? `<button class="button secondary" data-edit="${b.id}">Edit</button><button class="button secondary" data-cancel="${b.id}">Cancel</button>` : ""}</div></article>`;
+          return `<article class="booking-card"><div class="date-box"><small>${d.toLocaleDateString(undefined, { month: "short" })}</small><b>${d.getDate()}</b></div><div class="booking-content"><h3>${escapeHTML(b.title)}</h3><div class="booking-meta">${escapeHTML(roomName(b.room_id))} &nbsp;·&nbsp; ${tm(b.starts_at)} – ${tm(b.ends_at)} &nbsp;·&nbsp; ${b.attendees} people</div><div class="booking-badges"><span class="badge ${b.status === "cancelled" ? "cancelled" : ""}">${b.status === "cancelled" ? "Cancelled" : future ? "Confirmed" : "Past booking"}</span><span class="badge ${b.calendar_status === "synced" ? "neutral" : "pending"}">${{ pending: "Calendar update pending", synced: "Calendar updated", needs_review: "Update needs attention" }[b.calendar_status]}</span></div><div id="events-${b.id}" class="hidden history-inline"></div></div><div class="booking-actions"><button class="button secondary" data-events="${b.id}">Activity</button>${b.calendar_status === "needs_review" ? `<button class="button secondary" data-retry="${b.id}">Retry update</button>` : ""}${b.status === "confirmed" && future ? `<button class="button secondary" data-edit="${b.id}">Edit</button><button class="button secondary" data-cancel="${b.id}">Cancel</button>` : ""}</div></article>`;
         })
         .join("")
-    : `<div class="empty-state"><span class="empty-symbol">▦</span><h3>${state.filter === "cancelled" ? "No cancelled bookings" : "No confirmed bookings"}</h3><p>${state.filter === "cancelled" ? "Cancelled bookings will appear here." : "Choose a room and time to create a booking."}</p><button class="button primary" data-page="discover">Explore rooms →</button></div>`;
+    : `<div class="empty-state"><span class="empty-symbol">▦</span><h3>${state.filter === "cancelled" ? "No cancelled bookings" : state.filter === "past" ? "No past bookings" : "No confirmed bookings"}</h3><p>${state.filter === "cancelled" ? "Cancelled bookings will appear here." : state.filter === "past" ? "Completed reservations will appear here." : "Choose a room and time to create a booking."}</p><button class="button primary" data-page="discover">Explore rooms →</button></div>`;
 }
 function openBooking(roomId, booking = null) {
   state.editing = booking;
@@ -265,13 +273,13 @@ function renderMessages(messages) {
 function renderProposal(p) {
   state.proposal = p;
   $("#proposal").innerHTML = p
-    ? `<div class="proposal-card"><p class="eyebrow">YOUR APPROVAL REQUIRED</p><h3>${escapeHTML(p.arguments.title)}</h3><p>${escapeHTML(p.arguments.room_id)} · ${p.arguments.attendees} people<br>${dt(p.arguments.starts_at)} – ${tm(p.arguments.ends_at)}<br><small>Expires ${tm(p.expires_at)}. A new message replaces this proposal.</small></p><button class="button primary" id="approve-proposal">Approve & book</button><button class="button secondary" id="dismiss-proposal">Dismiss</button></div>`
+    ? `<div class="proposal-card"><p class="eyebrow">YOUR APPROVAL REQUIRED</p><h3>${escapeHTML(p.arguments.title)}</h3><p>${escapeHTML(roomName(p.arguments.room_id))} · ${p.arguments.attendees} people<br>${dt(p.arguments.starts_at)} – ${tm(p.arguments.ends_at)}<br><small>Expires ${tm(p.expires_at)}. A new message replaces this proposal.</small></p><button class="button primary" id="approve-proposal">Approve & book</button><button class="button secondary" id="dismiss-proposal">Dismiss</button></div>`
     : "";
 }
 async function loadWorkflow() {
   const {workflow: w} = await api("/assistant/workflow");
   if (!w) {
-    $("#workflow-state").textContent = "Start a conversation or a guided demo.";
+    $("#workflow-state").textContent = "Tell me the date, time, and group size.";
     return;
   }
   const labels = {pending: "Waiting for your approval", approved: "Reservation confirmed", conflict: "Room taken · choose an alternative", expired: "Proposal expired", superseded: "Replaced by a new request", dismissed: "Proposal dismissed", answered: "Ready for your reply", budget: "Request could not be completed", provider_error: "Assistant unavailable", unavailable: "Room unavailable"};
@@ -339,13 +347,13 @@ async function loadMetrics() {
     $("#worker-status").className =
       "badge " + (m.worker?.online ? "" : "pending");
     const cards = [
-      ["Confirmed bookings", m.confirmed, "Reserved rooms"],
+      ["Confirmed bookings", m.confirmed, "Includes past reservations"],
       [
         "Calendar updated",
         m.synced,
         "Across confirmed & cancelled bookings",
       ],
-      ["Waiting for calendar update", m.pending, `${m.needs_review} requiring review`],
+      ["Waiting for calendar update", m.pending, "Scheduled to update"],
       ["Updates needing attention", m.needs_review, "Open the booking to retry"],
     ];
     $("#metrics").innerHTML = cards
@@ -354,12 +362,11 @@ async function loadMetrics() {
           `<div class="metric"><span class="label">${label}</span><strong>${value}</strong><small>${note}</small></div>`,
       )
       .join("");
-    $("#sync-diagnostics").textContent = `${m.jobs} calendar tasks; ${m.retried} retried. 95% of completed updates took ${m.sync_p95_seconds === null ? "an unmeasured amount of time" : Number(m.sync_p95_seconds).toFixed(1) + " seconds or less"}. Pending and failed updates are excluded.`;
     $("#activity").innerHTML = m.history.length
       ? m.history.filter(h => h.kind !== "calendar_attempt").slice(0, 12)
           .map(
             (h) =>
-              `<div class="activity-item"><span class="event-dot">${h.kind === "calendar_synced" ? "✓" : h.kind.includes("retry") ? "↻" : "·"}</span><div><b>${escapeHTML(h.title)} · ${escapeHTML(activityText(h.kind)[0])}</b><p>${escapeHTML(activityText(h.kind)[1])}</p><small>${dt(h.created_at)} · ${escapeHTML(h.room_id)}</small></div></div>`,
+              `<div class="activity-item"><span class="event-dot">${h.kind === "calendar_synced" ? "✓" : h.kind.includes("retry") ? "↻" : "·"}</span><div><b>${escapeHTML(h.title)} · ${escapeHTML(activityText(h.kind)[0])}</b><p>${escapeHTML(activityText(h.kind)[1])}</p><small>${dt(h.created_at)} · ${escapeHTML(roomName(h.room_id))}</small></div></div>`,
           )
           .join("")
       : '<div class="empty-state"><h3>No activity yet</h3><p>Your booking and calendar updates will appear here.</p></div>';
@@ -438,7 +445,8 @@ async function actions(event) {
       renderProposal(null);
       toast("Approved. Your room is booked.");
       loadBookings();
-      await loadWorkflow();
+      await loadAssistant();
+      if (state.page === "discover") await search();
     }
     if (target.id === "dismiss-proposal") {
       await api("/assistant/proposals/" + state.proposal.id, {
@@ -450,14 +458,20 @@ async function actions(event) {
   } catch (e) {
     target.disabled = false;
     toast(e.message);
-    if (state.page === "assistant") await loadAssistant();
+    if (state.chatOpen) await loadAssistant();
   }
+}
+async function loadDemoProfiles() {
+  const profiles = await api("/demo/profiles");
+  $("#demo-profile").innerHTML = `<option value="">Your session</option>` + profiles.names.map(name => `<option>${escapeHTML(name)}</option>`).join("");
+  $(".profile-switch-label").classList.toggle("hidden", !profiles.names.length);
 }
 function setUser(user) {
   state.user = user;
   $("#user-name").textContent = user.name;
   $("#avatar").textContent = user.name[0].toUpperCase();
   $("#greeting").textContent = "Find a study room";
+  $("#demo-profile").value = [...$("#demo-profile").options].some(o => o.value === user.name) ? user.name : "";
 }
 async function init() {
   const tomorrow = new Date();
@@ -477,6 +491,7 @@ async function init() {
     if (["discover", "bookings", "assistant", "reliability"].includes(route))
       page(route);
   });
+  $("#room-floor").onchange = () => renderRooms();
   $("#search-form").addEventListener("submit", (e) => {
     e.preventDefault();
     search();
@@ -488,7 +503,10 @@ async function init() {
   );
   $("#confirm-cancel").addEventListener("click", cancelBooking);
   $("#chat-form").addEventListener("submit", chat);
-  $("#ask-assistant").onclick = () => page("assistant");
+  $("#ask-assistant").onclick = openAssistant;
+  $("#chat-launcher").onclick = openAssistant;
+  $("#close-assistant").onclick = closeAssistant;
+  document.addEventListener("keydown", e => { if(e.key === "Escape") closeAssistant(); });
   $("#profile").onclick = () => $("#profile-dialog").showModal();
   $("#sign-out").onclick = async () => {
     try {
@@ -508,6 +526,16 @@ async function init() {
       toast(error.message);
     }
   };
+  $("#demo-profile").onchange = async e => {
+    if (!e.target.value) return;
+    try {
+      setUser(await api("/demo/profiles/" + e.target.value, {method: "POST"}));
+      await loadBookings();
+      await search();
+      if(state.chatOpen) await loadAssistant();
+      if(state.page === "reliability") await loadMetrics();
+    } catch(err) { toast(err.message); }
+  };
   $("#session-form").onsubmit = async (e) => {
     e.preventDefault();
     try {
@@ -518,7 +546,7 @@ async function init() {
       setUser(user);
       $("#session-dialog").close();
       await loadBookings();
-      if (state.page === "assistant") await loadAssistant();
+      if (state.chatOpen) await loadAssistant();
       if (state.page === "reliability") await loadMetrics();
     } catch (err) {
       toast(err.message);
@@ -526,10 +554,13 @@ async function init() {
   };
   try {
     state.rooms = await api("/rooms");
+    $("#meeting-room").innerHTML = state.rooms.map(r => `<option value="${escapeHTML(r.id)}">${escapeHTML(r.name)} · up to ${r.capacity}</option>`).join("");
     renderRooms();
     await search();
+    await loadDemoProfiles();
     setUser(await api("/session"));
     await loadBookings();
+
   } catch (e) {
     if (!$("#session-dialog").open) toast(e.message);
   }

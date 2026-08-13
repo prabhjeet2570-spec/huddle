@@ -18,17 +18,15 @@
       <div class="workspace">
         <div class="workspace-avatar">S</div>
         <div>
-          <b>Study rooms</b><small>Three sample rooms</small>
+          <b>Study rooms</b><small>Quiet corners & group spaces</small>
         </div>
       </div>
-      <span class="nav-label">WORKSPACE</span>
+      <span class="nav-label">BOOKING</span>
       <nav>
         <button class="nav active" data-page="discover">
           <span>◫</span> Find a room</button
         ><button class="nav" data-page="bookings">
           <span>▦</span> My bookings <em id="booking-count">0</em></button
-        ><button class="nav" data-page="assistant">
-          <span>✧</span> Huddle assistant <i>AI</i></button
         ><button class="nav" data-page="reliability">
           <span>⌁</span> Booking activity
         </button>
@@ -37,7 +35,7 @@
         <button id="profile" class="profile">
           <span id="avatar">M</span>
           <div>
-            <b id="user-name">Your workspace</b><small>Manage session</small>
+            <b id="user-name">Your session</b><small>Manage session</small>
           </div>
           <span>↗</span>
         </button>
@@ -46,11 +44,11 @@
     <main>
       <header class="topbar">
         <div class="breadcrumb">
-          Workspace <span>/</span> <b id="page-title">Find a room</b>
+          <b id="page-title">Find a room</b>
         </div>
         <div class="top-actions">
           <span class="local-time" id="local-time"></span
-          ><span class="badge neutral">Demo workspace</span>
+          ><label class="profile-switch-label">Viewing as <select id="demo-profile" aria-label="Demo profile"><option value="">Your session</option></select></label>
         </div>
       </header>
       <div class="content">
@@ -64,7 +62,7 @@
               </p>
             </div>
             <button class="button secondary" id="ask-assistant">
-              ✧ Ask Huddle
+              <span aria-hidden="true"><svg class="chat-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H9l-6 4V6a2 2 0 0 1 2-2Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg></span> Ask Huddle
             </button>
           </div>
           <form id="search-form" class="search-bar">
@@ -93,7 +91,7 @@
                 <option value="4">4 people</option>
                 <option value="6">6 people</option>
                 <option value="8">8 people</option>
-                <option value="12">12 people</option>
+                <option value="12">12 people</option><option value="16">16 people</option><option value="24">24 people</option><option value="30">30 people</option>
               </select></label
             ><button class="button primary" type="submit">
               Search rooms <span>↗</span>
@@ -101,10 +99,10 @@
           </form>
           <div class="section-heading">
             <div>
-              <h2>Rooms <span id="room-count">3</span></h2>
+              <h2>Rooms <span id="room-count">24</span></h2>
               <p id="search-caption">Choose a time to see what’s available.</p>
             </div>
-            <span class="timezone"></span>
+            <label class="floor-control">Floor <select id="room-floor"><option value="">All floors</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select></label>
           </div>
           <div id="rooms" class="room-grid"></div>
           <p class="availability-note">Availability can change before you confirm a booking.</p>
@@ -123,40 +121,50 @@
           <div class="tabs">
             <button class="tab active" data-filter="confirmed">
               Confirmed</button
-            ><button class="tab" data-filter="cancelled">Cancelled</button>
+            ><button class="tab" data-filter="past">Past</button><button class="tab" data-filter="cancelled">Cancelled</button>
           </div>
           <div id="booking-list"></div>
         </section>
-        <section class="page hidden" id="assistant">
+        <section class="page hidden" id="reliability">
           <div class="page-heading">
             <div>
-              <p class="eyebrow">ROOM BOOKING ASSISTANT</p>
-              <h1>Ask Huddle</h1>
-              <p>
-                Describe what you need. Review every booking before it happens.
-              </p>
+              <p class="eyebrow">RESERVATION STATUS</p>
+              <h1>Booking activity</h1>
+              <p>Track your reservations and calendar updates.</p>
             </div>
-            <span class="badge neutral" id="model-status"
-              >Checking connection</span
+            <span class="badge neutral" id="worker-status"
+              >Checking updates</span
             >
           </div>
-          <div class="demo-strip">
-            <div><b>Try a sample booking</b><p>Sample rooms and scripted scenarios. No API key needed.</p></div>
-            <button class="button secondary" data-demo="booking">Book a room</button>
-            <button class="button secondary" data-demo="conflict">Room becomes unavailable</button>
-            <button class="button secondary" data-demo="restart">Return to a saved request</button>
+          <div class="metrics" id="metrics"></div>
+
+          <div class="reliability-grid">
+            <div class="panel">
+              <div class="panel-heading">
+                <h2>Recent activity</h2>
+
+              </div>
+              <div id="activity"></div>
+            </div>
+
           </div>
+        </section>
+        <footer><span>Huddle</span><span>Local demo · fictional rooms</span></footer>
+      </div>
+    </main>
+    <aside id="assistant" class="chat-drawer hidden" aria-label="Huddle booking assistant">
+<span class="connection-note" id="model-status">Connecting…</span>
           <div class="assistant-layout">
             <div class="chat-panel">
               <div class="chat-header">
-                <span class="assistant-orb">✧</span>
+                <span class="assistant-orb"><svg class="chat-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H9l-6 4V6a2 2 0 0 1 2-2Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg></span>
                 <div>
                   <b>Huddle assistant</b
-                  ><small>Search rooms and prepare a reservation.</small>
+                  ><small>Let’s find a space that works.</small>
                 </div>
                 <button class="button secondary" id="reset-chat">
                   New chat
-                </button>
+                </button><button class="icon-button" id="close-assistant" aria-label="Close assistant">×</button>
 
               </div>
               <div id="chat-messages" class="chat-messages"></div>
@@ -182,52 +190,22 @@
                 Chat messages are sent to the AI provider. Check the room and time before approving.
               </p>
             </div>
-            <aside class="assistant-notes">
+            <div class="assistant-notes">
               <div class="note-card workflow-card" aria-live="polite">
                 <p class="eyebrow">YOUR REQUEST</p>
-                <div id="workflow-state">Start a conversation or a guided demo.</div>
-                <button class="button secondary" id="refresh-workflow">Refresh status</button>
+                <div id="workflow-state">Tell me what you need.</div>
+                <button class="button secondary" id="refresh-workflow">Refresh</button>
               </div>
-              <div class="note-card plain">
-                <h3>Example requests</h3>
+              <details class="note-card plain"><summary>Try a request</summary>
+
                 <button class="suggestion">Find a room for 4 tomorrow at 10am for an hour</button>
                 <button class="suggestion">Show my bookings</button>
-              </div>
-            </aside>
-          </div>
-        </section>
-        <section class="page hidden" id="reliability">
-          <div class="page-heading">
-            <div>
-              <p class="eyebrow">RESERVATION STATUS</p>
-              <h1>Booking activity</h1>
-              <p>Track your reservations and calendar updates.</p>
-            </div>
-            <span class="badge neutral" id="worker-status"
-              >Checking worker</span
-            >
-          </div>
-          <div class="metrics" id="metrics"></div>
-          <details class="technical-details"><summary>Calendar diagnostics</summary><p id="sync-diagnostics"></p></details>
-          <div class="reliability-grid">
-            <div class="panel">
-              <div class="panel-heading">
-                <h2>Recent activity</h2>
-
-              </div>
-              <div id="activity"></div>
-            </div>
-            <div class="panel principles">
-              <h2>Calendar updates</h2>
-              <p>Your reservation is confirmed independently of the calendar update. If an update fails, the room stays reserved.</p>
-              <p>If a booking shows “Update needs attention,” open My bookings and choose Retry update.</p>
-              <p class="small-note">This demo uses a simulated calendar. It does not create events in your personal calendar.</p>
+                <details class="sample-flows"><summary>Sample flows without an API key</summary><button class="button secondary" data-demo="booking">Prepare a booking</button><button class="button secondary" data-demo="conflict">Try a room conflict</button><button class="button secondary" data-demo="restart">Prepare a saved request</button></details>
+              </details>
             </div>
           </div>
-        </section>
-        <footer><span>Huddle</span><span>Local demo · fictional rooms</span></footer>
-      </div>
-    </main>
+    </aside>
+<button id="chat-launcher" class="chat-launcher" aria-label="Open booking assistant"><svg class="chat-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H9l-6 4V6a2 2 0 0 1 2-2Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg> <span>Ask Huddle</span></button>
     <dialog id="booking-dialog">
       <form id="booking-form">
         <div class="dialog-heading">
@@ -252,9 +230,6 @@
             required /></label
         ><label
           >Room<select id="meeting-room">
-            <option value="cedar">Cedar · up to 4</option>
-            <option value="maple">Maple · up to 8</option>
-            <option value="birch">Birch · up to 12</option>
           </select></label
         >
         <div class="form-row">
@@ -272,7 +247,7 @@
             id="meeting-attendees"
             type="number"
             min="1"
-            max="12"
+            max="30"
             value="2"
             required
         /></label>
@@ -313,7 +288,7 @@
       <div class="welcome-mark">h.</div>
       <p class="eyebrow">WELCOME TO HUDDLE</p>
       <h2>Open your demo session</h2>
-      <p>Use a display name to try booking the sample rooms.</p>
+      <p>Choose a display name to explore the rooms.</p>
       <form id="session-form">
         <label
           >Your display name<input
@@ -321,7 +296,7 @@
             value="Morgan"
             maxlength="40"
             required /></label
-        ><button class="button primary full">Enter workspace →</button>
+        ><button class="button primary full">Continue →</button>
       </form>
       <small
         >Bookings are saved to this browser session. Use a demo name.</small
@@ -329,7 +304,7 @@
     </dialog>
     <dialog id="profile-dialog">
       <div class="dialog-heading">
-        <h2>Your demo workspace</h2>
+        <h2>Your session</h2>
         <button
           class="icon-button"
           data-close="profile-dialog"

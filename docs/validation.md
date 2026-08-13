@@ -133,3 +133,38 @@ The running API returned 200 for health, readiness, rooms, and assistant status.
 All four real HTTP/crash recovery trials passed again; raw results are saved in
 `artifacts/ui-recovery-results.json` without replacing the original recovery record.
 The screenshot set was refreshed to show the revised UI.
+
+## Numbered rooms, sample profiles and in-page chat
+
+The expanded catalog and UI passed **68 automated tests**, including SQL enforcement
+for a 30-person room, SQL/application catalog consistency, default-disabled sample
+profiles, and an idempotent persisted confirmation after assistant approval.
+
+All **16 live OpenRouter scenarios** passed. The prompts now use numbered rooms;
+additional cases exercise Room 105 (two people), Room 306 (16 people), and Room 404
+(30 people). The over-capacity scenario requests 31 rather than 20 people because
+20 is valid in the expanded catalog. Raw responses are in
+`artifacts/assistant-evaluation.json`; curated checks are not general LLM accuracy.
+
+[Profile scenario evidence](../artifacts/profile-scenarios.json) records 48 future
+bookings across Blake, Morgan, Jake and Ashley, 40 capacity/time search combinations,
+cross-owner read denial, cross-owner overlap rejection, stale edits and capacity
+rejection. Each profile exercised six real HTTP 503s, retry exhaustion preserving
+the room, and manual retry succeeding. Four historical fixtures were added explicitly
+in SQL for the Past view; their IDs are in `artifacts/history-fixtures.json`.
+Backoff clocks were accelerated; delayed work was held for 30 minutes. These are
+controlled demonstrations, not latency benchmarks or evidence of real users.
+
+The [expanded-catalog recovery rerun](../artifacts/expanded-catalog-recovery.json)
+passed response-loss and all three worker-process death trials again, with one
+remote calendar event per booking. The historical recovery artifact was preserved.
+
+Browser checks covered four-profile switching, floor filtering, upcoming/past/
+cancelled tabs, a live 16-person Room 306 proposal and approval, the persisted
+assistant confirmation naming that room, and a scripted competing reservation.
+Selecting Room 102 required a new approval and produced its own confirmation.
+Desktop checks used 1280px; mobile directory and chat used 390px with body width
+390px and drawer width 374px. Screenshots show those states in the README gallery.
+The primary UI no longer shows the Workspace breadcrumb, simulator paragraph,
+calendar explainer or completed-only latency claim. The provider/simulator boundary
+remains documented in the README.

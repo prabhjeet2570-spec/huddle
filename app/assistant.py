@@ -191,6 +191,10 @@ def approve(proposal_id: UUID, user=Depends(current_user)):
             )
         else:
             response = result["result"]
+            conn.execute(
+                "UPDATE conversations SET messages=messages || %s WHERE owner_id=%s",
+                (Jsonb([{"role": "assistant", "content": result["message"]}]), user["id"]),
+            )
     return response
 
 

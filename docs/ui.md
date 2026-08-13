@@ -1,29 +1,33 @@
 # Interface decisions
 
-Huddle is a local study-room booking demo. The interface prioritizes room search,
-reservation details, approval, and booking activity. Architecture belongs in the
-README and architecture document rather than the main booking flow.
+The room directory starts with date, time, group size, and a floor filter. Room
+numbers identify spaces across four floors. A warm neutral palette, muted green
+controls, and a simple serif page title give the interface a quieter character.
+Local room illustrations describe fictional spaces rather than claim photographs
+of a real library.
 
-The discovery page starts with time/capacity search. The marketing hero, promotional
-slogans, technology footer, and database-enforcement explanations were removed.
-The palette uses neutral surfaces and a restrained slate accent; card borders,
-compact room illustrations, and consistent controls replace decorative effects.
+The unclickable Workspace breadcrumb, “Three sample rooms” subtitle, separate
+assistant navigation page, calendar explainer panel and latency diagnostics were
+removed. A speech-bubble launcher opens the booking assistant beside discovery;
+closing it preserves the conversation. The legacy `#assistant` URL opens this drawer
+on Find a room. Mobile uses an inset drawer with independent scrolling.
 
-“Booking activity” reports user-visible outcomes. Calendar update status is useful
-because a reservation can be confirmed while its calendar update is delayed, and
-an exhausted update needs an explicit retry. Raw queue/revision terminology is
-translated to readable activity descriptions. Routine attempt events are omitted
-from the summary, with detailed booking history still available.
+After approval, a server-generated assistant message names the room and group
+size. That message is stored in conversation history, so refresh shows the same
+confirmation. Repeating approval returns the same booking and does not add another
+confirmation. Room conflicts still require a fresh proposal and approval.
 
-Two disclosures retain technical information for reviewers who choose it:
+Calendar status stays on bookings because it explains pending work and exposes the
+Retry update action. The technology description and simulator limitations live in
+the README. Booking activity shows actual persisted events and user-scoped counts.
+The completed-only p95 is available through the API, not displayed as a product
+performance claim. Technical workflow traces are optional and collapsed.
 
-- **Demo internals:** the saved agent steps help explain and inspect LangGraph.
-- **Calendar diagnostics:** completed-update latency and retries help investigate
-  synchronization behavior. The text explains that pending/failed work is excluded.
+A local-only profile selector exposes the populated sample sessions. Upcoming,
+past and cancelled reservations have separate tabs. Room-size mismatches are
+labeled “Too small for this group”; occupied spaces say “Booked for this time.”
+Floor filters also update the count of available rooms.
 
-These details start collapsed. The user-facing request state and alternative-room
-actions remain visible. The demo/simulated-calendar labels stay visible because
-Huddle does not reserve a real room or update a personal calendar.
-
-Mobile room discovery and assistant approval were checked at 390px; desktop
-room discovery was checked at 1280px. Both fit without horizontal overflow.
+Discovery and the chat drawer were checked at 390px with no horizontal overflow.
+Desktop discovery, approval, booking tabs and profile switching were checked at
+1280px. Screenshots show the running application and synthetic sample data.

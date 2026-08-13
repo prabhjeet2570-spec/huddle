@@ -24,6 +24,7 @@ from app.bookings import (
     list_bookings,
     validate_request,
 )
+from app.rooms import get_room
 
 
 class WorkflowState(TypedDict, total=False):
@@ -124,7 +125,7 @@ def build_graph(conn):
                     ).rooms
                     if booking.room_id not in {room.id for room in available}:
                         names = ", ".join(room.name for room in available)
-                        message = f"{booking.room_id.title()} is unavailable for that time. "
+                        message = f"{get_room(booking.room_id).name} is unavailable for that time. "
                         message += (
                             f"Available alternatives: {names}. Ask for one of these rooms to review a new proposal."
                             if names
@@ -222,7 +223,7 @@ def build_graph(conn):
         return {
             "result": result,
             "outcome": "booked",
-            "message": "Your demo reservation is confirmed.",
+            "message": f"Your room is booked. {get_room(result['room_id']).name} is reserved for {result['attendees']} people. You can find the time and reservation details in My bookings.",
             "trace": state["trace"] + ["reserved"],
         }
 

@@ -3,9 +3,10 @@
 Fixtures bypass the model, not the approval or database safeguards.
 """
 
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta
 from typing import Literal
 from uuid import UUID, uuid4
+from zoneinfo import ZoneInfo
 
 from fastapi import APIRouter, Depends, HTTPException
 from psycopg.types.json import Jsonb
@@ -65,7 +66,9 @@ def demo(body: DemoInput, user=Depends(current_user)):
             (user["id"],),
         )
         # Unique future windows keep repeated demos from interfering with one another.
-        start = datetime.now(UTC).replace(microsecond=0) + timedelta(days=2)
+        start = datetime.now(ZoneInfo("America/New_York")).replace(
+            hour=9, minute=0, second=0, microsecond=0
+        ) + timedelta(days=2)
         for _ in range(100):
             occupied = conn.execute(
                 "SELECT 1 FROM bookings WHERE status='confirmed' AND tstzrange(starts_at,ends_at,'[)') && tstzrange(%s,%s,'[)') LIMIT 1",
@@ -74,6 +77,8 @@ def demo(body: DemoInput, user=Depends(current_user)):
             if not occupied:
                 break
             start += timedelta(hours=1)
+            if start.hour >= 18:
+                start = (start + timedelta(days=1)).replace(hour=9)
         else:
             raise HTTPException(409, "No clear demo window found. Cancel old demo bookings first.")
         arguments = BookingRequest(
@@ -85,7 +90,7 @@ def demo(body: DemoInput, user=Depends(current_user)):
         ).model_dump(mode="json")
         messages = {
             "booking": "Sample booking: review the details, then approve to reserve this room.",
-            "conflict": "Sample conflict: another student has taken Cedar. Try approving this request to see the available alternatives.",
+            "conflict": "Sample conflict: another student has taken Room 101. Try approving this request to see the available alternatives.",
             "restart": "Saved-request demo: this proposal will still be here after restarting the app. Return in the same browser and approve within five minutes.",
         }
         result = pause_proposal(conn, user, arguments, messages[body.scenario])

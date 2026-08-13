@@ -1517,3 +1517,50 @@ footer { border-top: 1px solid var(--line); }
 .proposal-card { background: #f3f5f7; border-color: #dbe0e5; }
 .badge.neutral { background: #f0f1f2; color: #535b66; }
 .room-bottom button { color: #36465a; }
+
+/* Warm, practical room directory with an assistant that stays beside the task. */
+:root { --bg: #f7f5f0; --ink: #292d29; --muted: #71766f; --purple: #3e6050; --line: #e1e2da; }
+.sidebar { background: #f0eee7; }
+.nav.active { background: #e2e9de; color: #344e3c; }
+.brand-dot { color: #3e6050; }
+h1 { font-family: Georgia, serif; font-weight: 500; font-size: 34px; letter-spacing: -.7px; }
+.room-grid { gap: 20px; }
+.room-card { border-color: #dedfd6; }
+.room-image { height: 155px; background: #ece9df; }
+.room-image img { filter: saturate(.55); }
+.room-bottom button { color: #3e6050; }
+.profile-switch-label { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); }
+.profile-switch-label select { width: auto; padding: 6px 10px; border: 1px solid var(--line); border-radius: 4px; background: #fff; }
+.reliability-grid { grid-template-columns: 1fr; }
+.chat-launcher { position: fixed; bottom: 24px; right: 28px; z-index: 20; padding: 14px 20px; background: #3e6050; color: white; border: 0; border-radius: 30px; box-shadow: 0 3px 14px #263d2726; }
+.chat-drawer { position: fixed; top: 16px; right: 16px; bottom: 16px; width: 460px; z-index: 25; background: #fffefb; border: 1px solid #d6d9cf; border-radius: 12px; box-shadow: 0 8px 36px #263d2726; overflow-y: auto; }
+.chat-drawer .assistant-layout { display: block; }
+.chat-drawer .chat-panel { border: 0; background: transparent; }
+.chat-drawer .chat-header { padding: 16px; gap: 8px; }
+.chat-drawer .chat-header small { max-width: 180px; }
+.chat-drawer .chat-header .button { margin-left: auto; font-size: 11px; padding: 6px; }
+.chat-drawer .chat-header .icon-button { width: 28px; min-width: 28px; }
+.chat-drawer .chat-messages { height: 280px; min-height: 120px; padding: 16px; }
+.chat-drawer .assistant-notes { display: block; padding: 0 16px 12px; }
+.chat-drawer .note-card { padding: 12px; margin: 0 0 10px; border-radius: 6px; }
+.chat-drawer .note-card .eyebrow { display: none; }
+.chat-drawer .workflow-card h3 { font-size: 14px; }
+.chat-drawer .message { font-size: 14px; line-height: 1.55; }
+.chat-drawer .message.user { background: #e7eee3; }
+.connection-note { display: block; padding: 10px 16px 0; font-size: 11px; color: var(--muted); }
+.chat-drawer .chat-disclaimer { margin: 8px 16px; font-size: 11px; }
+.chat-drawer .proposal-card { margin: 0 16px 12px; padding: 14px; }
+@media (max-width: 520px) {
+  .chat-drawer { top: 8px; right: 8px; bottom: 8px; width: calc(100% - 16px); }
+  .chat-launcher { bottom: 18px; right: 16px; }
+  h1 { font-size: 29px; }
+  .top-actions .local-time { display: none; }
+}
+
+.chat-icon { width: 20px; height: 20px; vertical-align: middle; }
+.chat-launcher { display: flex; align-items: center; gap: 10px; }
+
+.floor-control { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 12px; }
+.floor-control select { width: auto; padding: 7px 10px; border: 1px solid var(--line); border-radius: 4px; background: white; }
+.sample-flows { margin-top: 14px; font-size: 12px; }
+.sample-flows button { display: block; margin-top: 8px; }

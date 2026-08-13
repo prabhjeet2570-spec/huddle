@@ -165,3 +165,8 @@ and its prompt use that same catalog. Internal IDs remain stable so existing
 bookings are preserved. Migration 005 replaces the three-room SQL check with a
 catalog foreign key and a capacity trigger; migration 006 gives the rooms clear
 numbers. A regression check verifies the SQL and application catalog agree.
+
+Approval appends one server-generated room confirmation to the persisted chat
+within the same transaction. Repeated approvals return the saved booking before
+appending another message. The local profile convenience is environment-gated;
+it does not change owner checks or make display names verified accounts.
