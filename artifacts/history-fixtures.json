@@ -1,0 +1,22 @@
+[
+  {
+    "name": "Blake",
+    "booking_id": "55ca0da6-cefb-57d3-b0cc-b2b8aa52ec69",
+    "historical_fixture": true
+  },
+  {
+    "name": "Morgan",
+    "booking_id": "c4dd08ea-ac04-5f6d-8d3a-f6f77698f413",
+    "historical_fixture": true
+  },
+  {
+    "name": "Jake",
+    "booking_id": "434e7053-24bc-58ac-85e2-7df19067a719",
+    "historical_fixture": true
+  },
+  {
+    "name": "Ashley",
+    "booking_id": "bb0a630c-f863-5b44-8a82-b9bf2737dc69",
+    "historical_fixture": true
+  }
+]

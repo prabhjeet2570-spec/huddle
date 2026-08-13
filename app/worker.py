@@ -13,15 +13,19 @@ from app.db import connect
 log = logging.getLogger(__name__)
 
 
-def run_once():
+def run_once(booking_id=None):
     token = uuid4()
     with connect() as conn:
         conn.execute(
             "INSERT INTO worker_heartbeats VALUES ('calendar',now()) ON CONFLICT(name) DO UPDATE SET seen_at=now()"
         )
-        job = conn.execute("""SELECT * FROM outbox WHERE
-            (state='pending' AND available_at<=now()) OR (state='processing' AND lease_until<now())
-            ORDER BY id FOR UPDATE SKIP LOCKED LIMIT 1""").fetchone()
+        job = conn.execute(
+            """SELECT * FROM outbox WHERE
+            ((state='pending' AND available_at<=now()) OR (state='processing' AND lease_until<now()))
+            AND (%s::uuid IS NULL OR booking_id=%s)
+            ORDER BY id FOR UPDATE SKIP LOCKED LIMIT 1""",
+            (booking_id, booking_id),
+        ).fetchone()
         if not job:
             return False
         booking = conn.execute(

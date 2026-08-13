@@ -67,3 +67,42 @@ def end_session(response: Response, huddle_session: str | None = Cookie(default=
             )
     response.delete_cookie("huddle_session")
     return {"ok": True}
+
+
+DEMO_NAMES = ("Blake", "Morgan", "Jake", "Ashley")
+
+
+@router.get("/demo/profiles")
+def demo_profiles():
+    return {"names": DEMO_NAMES if os.getenv("HUDDLE_DEMO_PROFILES") == "true" else []}
+
+
+@router.post("/demo/profiles/{name}")
+def switch_demo_profile(name: str, response: Response):
+    """Explicit local-only sample identities; this is not account authentication."""
+    from uuid import NAMESPACE_URL, uuid5
+
+    if os.getenv("HUDDLE_DEMO_PROFILES") != "true" or name not in DEMO_NAMES:
+        raise HTTPException(404, "Demo profile unavailable")
+    identity = uuid5(NAMESPACE_URL, "huddle-local-demo/" + name)
+    token = secrets.token_urlsafe(32)
+    with connect() as conn:
+        conn.execute(
+            """INSERT INTO sessions VALUES (%s,%s,%s,%s)
+            ON CONFLICT(id) DO UPDATE SET token_hash=excluded.token_hash,expires_at=excluded.expires_at""",
+            (
+                identity,
+                hashlib.sha256(token.encode()).hexdigest(),
+                name,
+                datetime.now(UTC) + timedelta(days=7),
+            ),
+        )
+    response.set_cookie(
+        "huddle_session",
+        token,
+        httponly=True,
+        samesite="strict",
+        max_age=604800,
+        secure=os.getenv("SECURE_COOKIES", "false").lower() == "true",
+    )
+    return {"id": str(identity), "name": name}

@@ -20,6 +20,9 @@ def db():
         "CREATE TABLE IF NOT EXISTS events (id TEXT PRIMARY KEY, version INTEGER, payload TEXT)"
     )
     connection.execute("CREATE TABLE IF NOT EXISTS faults (id TEXT PRIMARY KEY)")
+    connection.execute(
+        "CREATE TABLE IF NOT EXISTS failures (id TEXT PRIMARY KEY, remaining INTEGER)"
+    )
     return connection
 
 
@@ -48,6 +51,15 @@ def upsert_event(booking_id: UUID, event: CalendarEvent, authorization: str = He
     try:
         with connection:
             connection.execute("BEGIN IMMEDIATE")
+            failure = connection.execute(
+                "SELECT remaining FROM failures WHERE id=?", (str(booking_id),)
+            ).fetchone()
+            if failure and failure[0] > 0:
+                connection.execute(
+                    "UPDATE failures SET remaining=remaining-1 WHERE id=?", (str(booking_id),)
+                )
+                connection.commit()
+                raise HTTPException(503, "Injected calendar outage")
             previous = connection.execute(
                 "SELECT version,payload FROM events WHERE id=?", (str(booking_id),)
             ).fetchone()
@@ -102,3 +114,23 @@ def read_event(booking_id: UUID, authorization: str = Header()):
         return json.loads(row[0])
     finally:
         connection.close()
+
+
+class FailureInput(BaseModel):
+    attempts: int = Field(default=6, ge=0, le=12)
+
+
+@app.post("/failures/{booking_id}")
+def fail_updates(booking_id: UUID, body: FailureInput, authorization: str = Header()):
+    """Fault injection for the independent local calendar service."""
+    authorize(authorization)
+    connection = db()
+    try:
+        with connection:
+            connection.execute(
+                "INSERT INTO failures VALUES (?,?) ON CONFLICT(id) DO UPDATE SET remaining=excluded.remaining",
+                (str(booking_id), body.attempts),
+            )
+    finally:
+        connection.close()
+    return {"armed": body.attempts}

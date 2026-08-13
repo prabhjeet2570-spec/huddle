@@ -1,0 +1,1125 @@
+{
+  "recorded_at": "2026-10-05T00:16:21.234701-04:00",
+  "fixture_note": "48 local sample bookings; real HTTP 503 faults; backoff clock accelerated; one pending task per profile held for 30 minutes. Not production data or latency benchmarks.",
+  "checks": {
+    "Blake_six_failures_preserve_room": true,
+    "Blake_manual_retry_recovers": true,
+    "Morgan_six_failures_preserve_room": true,
+    "Morgan_manual_retry_recovers": true,
+    "Jake_six_failures_preserve_room": true,
+    "Jake_manual_retry_recovers": true,
+    "Ashley_six_failures_preserve_room": true,
+    "Ashley_manual_retry_recovers": true,
+    "cross_profile_read_denied": true,
+    "cross_profile_overlap_denied": true,
+    "over_capacity_denied": true,
+    "stale_edit_denied": true,
+    "forty_capacity_time_searches": true
+  },
+  "profiles": {
+    "Blake": {
+      "created": 12,
+      "metrics": {
+        "confirmed": 10,
+        "cancelled": 2,
+        "pending": 1,
+        "needs_review": 1,
+        "synced": 10,
+        "jobs": 15,
+        "retried": 1,
+        "sync_p95_seconds": 1.3569322999999998,
+        "oldest_pending_seconds": 1.838997,
+        "worker": {
+          "seen_at": "2026-10-05T04:16:15.865910+00:00",
+          "online": true
+        },
+        "history": [
+          {
+            "kind": "needs_review",
+            "detail": "Calendar response uncertain. Room allocation retained; reconciliation requires review.",
+            "created_at": "2026-10-05T04:16:15.883500+00:00",
+            "title": "Exam revision",
+            "room_id": "sage",
+            "booking_id": "3fcb1e60-f834-4f2d-8976-aac38b407146"
+          },
+          {
+            "kind": "calendar_attempt",
+            "detail": "Calendar attempt 6 for revision 1.",
+            "created_at": "2026-10-05T04:16:15.865910+00:00",
+            "title": "Exam revision",
+            "room_id": "sage",
+            "booking_id": "3fcb1e60-f834-4f2d-8976-aac38b407146"
+          },
+          {
+            "kind": "calendar_retry",
+            "detail": "Calendar response uncertain. Room allocation retained; reconciliation queued.",
+            "created_at": "2026-10-05T04:16:15.846962+00:00",
+            "title": "Exam revision",
+            "room_id": "sage",
+            "booking_id": "3fcb1e60-f834-4f2d-8976-aac38b407146"
+          },
+          {
+            "kind": "calendar_attempt",
+            "detail": "Calendar attempt 5 for revision 1.",
+            "created_at": "2026-10-05T04:16:15.829315+00:00",
+            "title": "Exam revision",
+            "room_id": "sage",
+            "booking_id": "3fcb1e60-f834-4f2d-8976-aac38b407146"
+          },
+          {
+            "kind": "calendar_retry",
+            "detail": "Calendar response uncertain. Room allocation retained; reconciliation queued.",
+            "created_at": "2026-10-05T04:16:15.810667+00:00",
+            "title": "Exam revision",
+            "room_id": "sage",
+            "booking_id": "3fcb1e60-f834-4f2d-8976-aac38b407146"
+          },
+          {
+            "kind": "calendar_attempt",
+            "detail": "Calendar attempt 4 for revision 1.",
+            "created_at": "2026-10-05T04:16:15.793377+00:00",
+            "title": "Exam revision",
+            "room_id": "sage",
+            "booking_id": "3fcb1e60-f834-4f2d-8976-aac38b407146"
+          },
+          {
+            "kind": "calendar_retry",
+            "detail": "Calendar response uncertain. Room allocation retained; reconciliation queued.",
+            "created_at": "2026-10-05T04:16:15.774165+00:00",
+            "title": "Exam revision",
+            "room_id": "sage",
+            "booking_id": "3fcb1e60-f834-4f2d-8976-aac38b407146"
+          },
+          {
+            "kind": "calendar_attempt",
+            "detail": "Calendar attempt 3 for revision 1.",
+            "created_at": "2026-10-05T04:16:15.753901+00:00",
+            "title": "Exam revision",
+            "room_id": "sage",
+            "booking_id": "3fcb1e60-f834-4f2d-8976-aac38b407146"
+          },
+          {
+            "kind": "calendar_retry",
+            "detail": "Calendar response uncertain. Room allocation retained; reconciliation queued.",
+            "created_at": "2026-10-05T04:16:15.729786+00:00",
+            "title": "Exam revision",
+            "room_id": "sage",
+            "booking_id": "3fcb1e60-f834-4f2d-8976-aac38b407146"
+          },
+          {
+            "kind": "calendar_attempt",
+            "detail": "Calendar attempt 2 for revision 1.",
+            "created_at": "2026-10-05T04:16:15.710222+00:00",
+            "title": "Exam revision",
+            "room_id": "sage",
+            "booking_id": "3fcb1e60-f834-4f2d-8976-aac38b407146"
+          },
+          {
+            "kind": "calendar_retry",
+            "detail": "Calendar response uncertain. Room allocation retained; reconciliation queued.",
+            "created_at": "2026-10-05T04:16:15.689705+00:00",
+            "title": "Exam revision",
+            "room_id": "sage",
+            "booking_id": "3fcb1e60-f834-4f2d-8976-aac38b407146"
+          },
+          {
+            "kind": "calendar_attempt",
+            "detail": "Calendar attempt 1 for revision 1.",
+            "created_at": "2026-10-05T04:16:15.670477+00:00",
+            "title": "Exam revision",
+            "room_id": "sage",
+            "booking_id": "3fcb1e60-f834-4f2d-8976-aac38b407146"
+          },
+          {
+            "kind": "calendar_synced",
+            "detail": "Calendar revision 1 reconciled without a duplicate event.",
+            "created_at": "2026-10-05T04:16:15.614362+00:00",
+            "title": "Design critique",
+            "room_id": "elm",
+            "booking_id": "1dc18761-292d-4557-8af1-e19488b4f370"
+          },
+          {
+            "kind": "calendar_attempt",
+            "detail": "Calendar attempt 1 for revision 1.",
+            "created_at": "2026-10-05T04:16:15.595492+00:00",
+            "title": "Design critique",
+            "room_id": "elm",
+            "booking_id": "1dc18761-292d-4557-8af1-e19488b4f370"
+          },
+          {
+            "kind": "manual_retry",
+            "detail": "Calendar reconciliation requeued by the booking owner.",
+            "created_at": "2026-10-05T04:16:15.583739+00:00",
+            "title": "Design critique",
+            "room_id": "elm",
+            "booking_id": "1dc18761-292d-4557-8af1-e19488b4f370"
+          },
+          {
+            "kind": "needs_review",
+            "detail": "Calendar response uncertain. Room allocation retained; reconciliation requires review.",
+            "created_at": "2026-10-05T04:16:15.538288+00:00",
+            "title": "Design critique",
+            "room_id": "elm",
+            "booking_id": "1dc18761-292d-4557-8af1-e19488b4f370"
+          },
+          {
+            "kind": "calendar_attempt",
+            "detail": "Calendar attempt 6 for revision 1.",
+            "created_at": "2026-10-05T04:16:15.516821+00:00",
+            "title": "Design critique",
+            "room_id": "elm",
+            "booking_id": "1dc18761-292d-4557-8af1-e19488b4f370"
+          },
+          {
+            "kind": "calendar_retry",
+            "detail": "Calendar response uncertain. Room allocation retained; reconciliation queued.",
+            "created_at": "2026-10-05T04:16:15.498310+00:00",
+            "title": "Design critique",
+            "room_id": "elm",
+            "booking_id": "1dc18761-292d-4557-8af1-e19488b4f370"
+          },
+          {
+            "kind": "calendar_attempt",
+            "detail": "Calendar attempt 5 for revision 1.",
+            "created_at": "2026-10-05T04:16:15.479992+00:00",
+            "title": "Design critique",
+            "room_id": "elm",
+            "booking_id": "1dc18761-292d-4557-8af1-e19488b4f370"
+          },
+          {
+            "kind": "calendar_retry",
+            "detail": "Calendar response uncertain. Room allocation retained; reconciliation queued.",
+            "created_at": "2026-10-05T04:16:15.460670+00:00",
+            "title": "Design critique",
+            "room_id": "elm",
+            "booking_id": "1dc18761-292d-4557-8af1-e19488b4f370"
+          },
+          {
+            "kind": "calendar_attempt",
+            "detail": "Calendar attempt 4 for revision 1.",
+            "created_at": "2026-10-05T04:16:15.442300+00:00",
+            "title": "Design critique",
+            "room_id": "elm",
+            "booking_id": "1dc18761-292d-4557-8af1-e19488b4f370"
+          },
+          {
+            "kind": "calendar_retry",
+            "detail": "Calendar response uncertain. Room allocation retained; reconciliation queued.",
+            "created_at": "2026-10-05T04:16:15.423052+00:00",
+            "title": "Design critique",
+            "room_id": "elm",
+            "booking_id": "1dc18761-292d-4557-8af1-e19488b4f370"
+          },
+          {
+            "kind": "calendar_attempt",
+            "detail": "Calendar attempt 3 for revision 1.",
+            "created_at": "2026-10-05T04:16:15.403036+00:00",
+            "title": "Design critique",
+            "room_id": "elm",
+            "booking_id": "1dc18761-292d-4557-8af1-e19488b4f370"
+          },
+          {
+            "kind": "calendar_retry",
+            "detail": "Calendar response uncertain. Room allocation retained; reconciliation queued.",
+            "created_at": "2026-10-05T04:16:15.381767+00:00",
+            "title": "Design critique",
+            "room_id": "elm",
+            "booking_id": "1dc18761-292d-4557-8af1-e19488b4f370"
+          },
+          {
+            "kind": "calendar_attempt",
+            "detail": "Calendar attempt 2 for revision 1.",
+            "created_at": "2026-10-05T04:16:15.362779+00:00",
+            "title": "Design critique",
+            "room_id": "elm",
+            "booking_id": "1dc18761-292d-4557-8af1-e19488b4f370"
+          },
+          {
+            "kind": "calendar_retry",
+            "detail": "Calendar response uncertain. Room allocation retained; reconciliation queued.",
+            "created_at": "2026-10-05T04:16:15.338792+00:00",
+            "title": "Design critique",
+            "room_id": "elm",
+            "booking_id": "1dc18761-292d-4557-8af1-e19488b4f370"
+          },
+          {
+            "kind": "calendar_attempt",
+            "detail": "Calendar attempt 1 for revision 1.",
+            "created_at": "2026-10-05T04:16:15.315751+00:00",
+            "title": "Design critique",
+            "room_id": "elm",
+            "booking_id": "1dc18761-292d-4557-8af1-e19488b4f370"
+          },
+          {
+            "kind": "calendar_synced",
+            "detail": "Calendar revision 1 reconciled without a duplicate event.",
+            "created_at": "2026-10-05T04:16:15.270237+00:00",
+            "title": "Quiet writing hour",
+            "room_id": "hazel",
+            "booking_id": "61de74fb-852c-43d0-ae1d-88e4244b8743"
+          },
+          {
+            "kind": "calendar_attempt",
+            "detail": "Calendar attempt 1 for revision 1.",
+            "created_at": "2026-10-05T04:16:15.250692+00:00",
+            "title": "Quiet writing hour",
+            "room_id": "hazel",
+            "booking_id": "61de74fb-852c-43d0-ae1d-88e4244b8743"
+          },
+          {
+            "kind": "calendar_synced",
+            "detail": "Calendar revision 1 reconciled without a duplicate event.",
+            "created_at": "2026-10-05T04:16:15.230324+00:00",
+            "title": "Presentation rehearsal",
+            "room_id": "pine",
+            "booking_id": "41f594d4-558e-4ebb-bd04-d391c5b82475"
+          }
+        ],
+        "scope": "Current workspace session; calendar simulator",
+        "latency_definition": "p95 seconds from outbox enqueue to successful reconciliation, including retries; completed jobs only"
+      },
+      "booking_ids": [
+        "07319e14-f70b-40bc-85c4-0e23f830321a",
+        "28b8d823-2da3-4b20-93dc-99a8dfb45fd3",
+        "dd489b04-4d19-4334-a413-d6eca79d0529",
+        "cc9b1414-dfcc-4de1-a01d-c07db8b42c86",
+        "3b3529a4-00a9-415e-a6a4-29ceff879628",
+        "284c7566-fdc6-4a3d-83f6-3cc629758114",
+        "1dc18761-292d-4557-8af1-e19488b4f370",
+        "3fcb1e60-f834-4f2d-8976-aac38b407146",
+        "2a65bd94-9d37-4b0f-8229-beb6bc951faa",
+        "37355da4-181e-48ac-92cf-a0e10fcf1def",
+        "41f594d4-558e-4ebb-bd04-d391c5b82475",
+        "61de74fb-852c-43d0-ae1d-88e4244b8743"
+      ]
+    },
+    "Morgan": {
+      "created": 12,
+      "metrics": {
+        "confirmed": 10,
+        "cancelled": 2,
+        "pending": 1,
+        "needs_review": 1,
+        "synced": 10,
+        "jobs": 15,
+        "retried": 1,
+        "sync_p95_seconds": 0.9089944499999998,
+        "oldest_pending_seconds": 1.39997,
+        "worker": {
+          "seen_at": "2026-10-05T04:16:17.469281+00:00",
+          "online": true
+        },
+        "history": [
+          {
+            "kind": "needs_review",
+            "detail": "Calendar response uncertain. Room allocation retained; reconciliation requires review.",
+            "created_at": "2026-10-05T04:16:17.488164+00:00",
+            "title": "Exam revision",
+            "room_id": "laurel",
+            "booking_id": "5327c9cc-72c0-4c21-b491-97b19e3b0342"
+          },
+          {
+            "kind": "calendar_attempt",
+            "detail": "Calendar attempt 6 for revision 1.",
+            "created_at": "2026-10-05T04:16:17.469281+00:00",
+            "title": "Exam revision",
+            "room_id": "laurel",
+            "booking_id": "5327c9cc-72c0-4c21-b491-97b19e3b0342"
+          },
+          {
+            "kind": "calendar_retry",
+            "detail": "Calendar response uncertain. Room allocation retained; reconciliation queued.",
+            "created_at": "2026-10-05T04:16:17.448077+00:00",
+            "title": "Exam revision",
+            "room_id": "laurel",
+            "booking_id": "5327c9cc-72c0-4c21-b491-97b19e3b0342"
+          },
+          {
+            "kind": "calendar_attempt",
+            "detail": "Calendar attempt 5 for revision 1.",
+            "created_at": "2026-10-05T04:16:17.429595+00:00",
+            "title": "Exam revision",
+            "room_id": "laurel",
+            "booking_id": "5327c9cc-72c0-4c21-b491-97b19e3b0342"
+          },
+          {
+            "kind": "calendar_retry",
+            "detail": "Calendar response uncertain. Room allocation retained; reconciliation queued.",
+            "created_at": "2026-10-05T04:16:17.404868+00:00",
+            "title": "Exam revision",
+            "room_id": "laurel",
+            "booking_id": "5327c9cc-72c0-4c21-b491-97b19e3b0342"
+          },
+          {
+            "kind": "calendar_attempt",
+            "detail": "Calendar attempt 4 for revision 1.",
+            "created_at": "2026-10-05T04:16:17.381248+00:00",
+            "title": "Exam revision",
+            "room_id": "laurel",
+            "booking_id": "5327c9cc-72c0-4c21-b491-97b19e3b0342"
+          },
+          {
+            "kind": "calendar_retry",
+            "detail": "Calendar response uncertain. Room allocation retained; reconciliation queued.",
+            "created_at": "2026-10-05T04:16:17.361326+00:00",
+            "title": "Exam revision",
+            "room_id": "laurel",
+            "booking_id": "5327c9cc-72c0-4c21-b491-97b19e3b0342"
+          },
+          {
+            "kind": "calendar_attempt",
+            "detail": "Calendar attempt 3 for revision 1.",
+            "created_at": "2026-10-05T04:16:17.343671+00:00",
+            "title": "Exam revision",
+            "room_id": "laurel",
+            "booking_id": "5327c9cc-72c0-4c21-b491-97b19e3b0342"
+          },
+          {
+            "kind": "calendar_retry",
+            "detail": "Calendar response uncertain. Room allocation retained; reconciliation queued.",
+            "created_at": "2026-10-05T04:16:17.324870+00:00",
+            "title": "Exam revision",
+            "room_id": "laurel",
+            "booking_id": "5327c9cc-72c0-4c21-b491-97b19e3b0342"
+          },
+          {
+            "kind": "calendar_attempt",
+            "detail": "Calendar attempt 2 for revision 1.",
+            "created_at": "2026-10-05T04:16:17.305290+00:00",
+            "title": "Exam revision",
+            "room_id": "laurel",
+            "booking_id": "5327c9cc-72c0-4c21-b491-97b19e3b0342"
+          },
+          {
+            "kind": "calendar_retry",
+            "detail": "Calendar response uncertain. Room allocation retained; reconciliation queued.",
+            "created_at": "2026-10-05T04:16:17.283859+00:00",
+            "title": "Exam revision",
+            "room_id": "laurel",
+            "booking_id": "5327c9cc-72c0-4c21-b491-97b19e3b0342"
+          },
+          {
+            "kind": "calendar_attempt",
+            "detail": "Calendar attempt 1 for revision 1.",
+            "created_at": "2026-10-05T04:16:17.265571+00:00",
+            "title": "Exam revision",
+            "room_id": "laurel",
+            "booking_id": "5327c9cc-72c0-4c21-b491-97b19e3b0342"
+          },
+          {
+            "kind": "calendar_synced",
+            "detail": "Calendar revision 1 reconciled without a duplicate event.",
+            "created_at": "2026-10-05T04:16:17.211764+00:00",
+            "title": "Design critique",
+            "room_id": "alder",
+            "booking_id": "2047144e-9b74-4b85-bd8e-4fa841e77cc9"
+          },
+          {
+            "kind": "calendar_attempt",
+            "detail": "Calendar attempt 1 for revision 1.",
+            "created_at": "2026-10-05T04:16:17.191642+00:00",
+            "title": "Design critique",
+            "room_id": "alder",
+            "booking_id": "2047144e-9b74-4b85-bd8e-4fa841e77cc9"
+          },
+          {
+            "kind": "manual_retry",
+            "detail": "Calendar reconciliation requeued by the booking owner.",
+            "created_at": "2026-10-05T04:16:17.179240+00:00",
+            "title": "Design critique",
+            "room_id": "alder",
+            "booking_id": "2047144e-9b74-4b85-bd8e-4fa841e77cc9"
+          },
+          {
+            "kind": "needs_review",
+            "detail": "Calendar response uncertain. Room allocation retained; reconciliation requires review.",
+            "created_at": "2026-10-05T04:16:17.137985+00:00",
+            "title": "Design critique",
+            "room_id": "alder",
+            "booking_id": "2047144e-9b74-4b85-bd8e-4fa841e77cc9"
+          },
+          {
+            "kind": "calendar_attempt",
+            "detail": "Calendar attempt 6 for revision 1.",
+            "created_at": "2026-10-05T04:16:17.117326+00:00",
+            "title": "Design critique",
+            "room_id": "alder",
+            "booking_id": "2047144e-9b74-4b85-bd8e-4fa841e77cc9"
+          },
+          {
+            "kind": "calendar_retry",
+            "detail": "Calendar response uncertain. Room allocation retained; reconciliation queued.",
+            "created_at": "2026-10-05T04:16:17.097219+00:00",
+            "title": "Design critique",
+            "room_id": "alder",
+            "booking_id": "2047144e-9b74-4b85-bd8e-4fa841e77cc9"
+          },
+          {
+            "kind": "calendar_attempt",
+            "detail": "Calendar attempt 5 for revision 1.",
+            "created_at": "2026-10-05T04:16:17.077882+00:00",
+            "title": "Design critique",
+            "room_id": "alder",
+            "booking_id": "2047144e-9b74-4b85-bd8e-4fa841e77cc9"
+          },
+          {
+            "kind": "calendar_retry",
+            "detail": "Calendar response uncertain. Room allocation retained; reconciliation queued.",
+            "created_at": "2026-10-05T04:16:17.057897+00:00",
+            "title": "Design critique",
+            "room_id": "alder",
+            "booking_id": "2047144e-9b74-4b85-bd8e-4fa841e77cc9"
+          },
+          {
+            "kind": "calendar_attempt",
+            "detail": "Calendar attempt 4 for revision 1.",
+            "created_at": "2026-10-05T04:16:17.039246+00:00",
+            "title": "Design critique",
+            "room_id": "alder",
+            "booking_id": "2047144e-9b74-4b85-bd8e-4fa841e77cc9"
+          },
+          {
+            "kind": "calendar_retry",
+            "detail": "Calendar response uncertain. Room allocation retained; reconciliation queued.",
+            "created_at": "2026-10-05T04:16:17.018397+00:00",
+            "title": "Design critique",
+            "room_id": "alder",
+            "booking_id": "2047144e-9b74-4b85-bd8e-4fa841e77cc9"
+          },
+          {
+            "kind": "calendar_attempt",
+            "detail": "Calendar attempt 3 for revision 1.",
+            "created_at": "2026-10-05T04:16:16.999498+00:00",
+            "title": "Design critique",
+            "room_id": "alder",
+            "booking_id": "2047144e-9b74-4b85-bd8e-4fa841e77cc9"
+          },
+          {
+            "kind": "calendar_retry",
+            "detail": "Calendar response uncertain. Room allocation retained; reconciliation queued.",
+            "created_at": "2026-10-05T04:16:16.979947+00:00",
+            "title": "Design critique",
+            "room_id": "alder",
+            "booking_id": "2047144e-9b74-4b85-bd8e-4fa841e77cc9"
+          },
+          {
+            "kind": "calendar_attempt",
+            "detail": "Calendar attempt 2 for revision 1.",
+            "created_at": "2026-10-05T04:16:16.958473+00:00",
+            "title": "Design critique",
+            "room_id": "alder",
+            "booking_id": "2047144e-9b74-4b85-bd8e-4fa841e77cc9"
+          },
+          {
+            "kind": "calendar_retry",
+            "detail": "Calendar response uncertain. Room allocation retained; reconciliation queued.",
+            "created_at": "2026-10-05T04:16:16.938844+00:00",
+            "title": "Design critique",
+            "room_id": "alder",
+            "booking_id": "2047144e-9b74-4b85-bd8e-4fa841e77cc9"
+          },
+          {
+            "kind": "calendar_attempt",
+            "detail": "Calendar attempt 1 for revision 1.",
+            "created_at": "2026-10-05T04:16:16.919262+00:00",
+            "title": "Design critique",
+            "room_id": "alder",
+            "booking_id": "2047144e-9b74-4b85-bd8e-4fa841e77cc9"
+          },
+          {
+            "kind": "calendar_synced",
+            "detail": "Calendar revision 1 reconciled without a duplicate event.",
+            "created_at": "2026-10-05T04:16:16.873568+00:00",
+            "title": "Quiet writing hour",
+            "room_id": "sequoia",
+            "booking_id": "0f4dda3b-0f03-418a-9140-f40a900d534a"
+          },
+          {
+            "kind": "calendar_attempt",
+            "detail": "Calendar attempt 1 for revision 1.",
+            "created_at": "2026-10-05T04:16:16.855429+00:00",
+            "title": "Quiet writing hour",
+            "room_id": "sequoia",
+            "booking_id": "0f4dda3b-0f03-418a-9140-f40a900d534a"
+          },
+          {
+            "kind": "calendar_synced",
+            "detail": "Calendar revision 1 reconciled without a duplicate event.",
+            "created_at": "2026-10-05T04:16:16.834125+00:00",
+            "title": "Presentation rehearsal",
+            "room_id": "magnolia",
+            "booking_id": "e465fc07-2376-4c1f-b570-79023f768e65"
+          }
+        ],
+        "scope": "Current workspace session; calendar simulator",
+        "latency_definition": "p95 seconds from outbox enqueue to successful reconciliation, including retries; completed jobs only"
+      },
+      "booking_ids": [
+        "0265a518-e084-450a-9e64-47e1e65b74f8",
+        "690f9cdd-485f-4569-a057-924613a6d7ee",
+        "79359c7a-98a8-48fa-8c1a-9a542ff9a516",
+        "e1b73940-e8e9-45ce-871d-433123c9c452",
+        "92c608a5-1e7e-49db-854c-abe50ab68c6a",
+        "8fd95e95-0ca5-46e1-89c1-e0c22c347344",
+        "2047144e-9b74-4b85-bd8e-4fa841e77cc9",
+        "5327c9cc-72c0-4c21-b491-97b19e3b0342",
+        "5bc107ed-5ca1-4035-8658-642fed5cf539",
+        "e203fddd-d0b4-409d-ba95-7bc2a0029850",
+        "e465fc07-2376-4c1f-b570-79023f768e65",
+        "0f4dda3b-0f03-418a-9140-f40a900d534a"
+      ]
+    },
+    "Jake": {
+      "created": 12,
+      "metrics": {
+        "confirmed": 10,
+        "cancelled": 2,
+        "pending": 1,
+        "needs_review": 1,
+        "synced": 10,
+        "jobs": 15,
+        "retried": 1,
+        "sync_p95_seconds": 0.8780150499999998,
+        "oldest_pending_seconds": 1.394174,
+        "worker": {
+          "seen_at": "2026-10-05T04:16:19.070810+00:00",
+          "online": true
+        },
+        "history": [
+          {
+            "kind": "needs_review",
+            "detail": "Calendar response uncertain. Room allocation retained; reconciliation requires review.",
+            "created_at": "2026-10-05T04:16:19.090581+00:00",
+            "title": "Exam revision",
+            "room_id": "grove",
+            "booking_id": "708870e5-4c99-4824-8637-fdbd8d5a9a8c"
+          },
+          {
+            "kind": "calendar_attempt",
+            "detail": "Calendar attempt 6 for revision 1.",
+            "created_at": "2026-10-05T04:16:19.070810+00:00",
+            "title": "Exam revision",
+            "room_id": "grove",
+            "booking_id": "708870e5-4c99-4824-8637-fdbd8d5a9a8c"
+          },
+          {
+            "kind": "calendar_retry",
+            "detail": "Calendar response uncertain. Room allocation retained; reconciliation queued.",
+            "created_at": "2026-10-05T04:16:19.050280+00:00",
+            "title": "Exam revision",
+            "room_id": "grove",
+            "booking_id": "708870e5-4c99-4824-8637-fdbd8d5a9a8c"
+          },
+          {
+            "kind": "calendar_attempt",
+            "detail": "Calendar attempt 5 for revision 1.",
+            "created_at": "2026-10-05T04:16:19.031155+00:00",
+            "title": "Exam revision",
+            "room_id": "grove",
+            "booking_id": "708870e5-4c99-4824-8637-fdbd8d5a9a8c"
+          },
+          {
+            "kind": "calendar_retry",
+            "detail": "Calendar response uncertain. Room allocation retained; reconciliation queued.",
+            "created_at": "2026-10-05T04:16:19.011337+00:00",
+            "title": "Exam revision",
+            "room_id": "grove",
+            "booking_id": "708870e5-4c99-4824-8637-fdbd8d5a9a8c"
+          },
+          {
+            "kind": "calendar_attempt",
+            "detail": "Calendar attempt 4 for revision 1.",
+            "created_at": "2026-10-05T04:16:18.988881+00:00",
+            "title": "Exam revision",
+            "room_id": "grove",
+            "booking_id": "708870e5-4c99-4824-8637-fdbd8d5a9a8c"
+          },
+          {
+            "kind": "calendar_retry",
+            "detail": "Calendar response uncertain. Room allocation retained; reconciliation queued.",
+            "created_at": "2026-10-05T04:16:18.967307+00:00",
+            "title": "Exam revision",
+            "room_id": "grove",
+            "booking_id": "708870e5-4c99-4824-8637-fdbd8d5a9a8c"
+          },
+          {
+            "kind": "calendar_attempt",
+            "detail": "Calendar attempt 3 for revision 1.",
+            "created_at": "2026-10-05T04:16:18.938421+00:00",
+            "title": "Exam revision",
+            "room_id": "grove",
+            "booking_id": "708870e5-4c99-4824-8637-fdbd8d5a9a8c"
+          },
+          {
+            "kind": "calendar_retry",
+            "detail": "Calendar response uncertain. Room allocation retained; reconciliation queued.",
+            "created_at": "2026-10-05T04:16:18.917393+00:00",
+            "title": "Exam revision",
+            "room_id": "grove",
+            "booking_id": "708870e5-4c99-4824-8637-fdbd8d5a9a8c"
+          },
+          {
+            "kind": "calendar_attempt",
+            "detail": "Calendar attempt 2 for revision 1.",
+            "created_at": "2026-10-05T04:16:18.897941+00:00",
+            "title": "Exam revision",
+            "room_id": "grove",
+            "booking_id": "708870e5-4c99-4824-8637-fdbd8d5a9a8c"
+          },
+          {
+            "kind": "calendar_retry",
+            "detail": "Calendar response uncertain. Room allocation retained; reconciliation queued.",
+            "created_at": "2026-10-05T04:16:18.875178+00:00",
+            "title": "Exam revision",
+            "room_id": "grove",
+            "booking_id": "708870e5-4c99-4824-8637-fdbd8d5a9a8c"
+          },
+          {
+            "kind": "calendar_attempt",
+            "detail": "Calendar attempt 1 for revision 1.",
+            "created_at": "2026-10-05T04:16:18.851605+00:00",
+            "title": "Exam revision",
+            "room_id": "grove",
+            "booking_id": "708870e5-4c99-4824-8637-fdbd8d5a9a8c"
+          },
+          {
+            "kind": "calendar_synced",
+            "detail": "Calendar revision 1 reconciled without a duplicate event.",
+            "created_at": "2026-10-05T04:16:18.790673+00:00",
+            "title": "Design critique",
+            "room_id": "cypress",
+            "booking_id": "16dd232a-a851-4dce-8534-e2b324dae6f6"
+          },
+          {
+            "kind": "calendar_attempt",
+            "detail": "Calendar attempt 1 for revision 1.",
+            "created_at": "2026-10-05T04:16:18.771970+00:00",
+            "title": "Design critique",
+            "room_id": "cypress",
+            "booking_id": "16dd232a-a851-4dce-8534-e2b324dae6f6"
+          },
+          {
+            "kind": "manual_retry",
+            "detail": "Calendar reconciliation requeued by the booking owner.",
+            "created_at": "2026-10-05T04:16:18.758678+00:00",
+            "title": "Design critique",
+            "room_id": "cypress",
+            "booking_id": "16dd232a-a851-4dce-8534-e2b324dae6f6"
+          },
+          {
+            "kind": "needs_review",
+            "detail": "Calendar response uncertain. Room allocation retained; reconciliation requires review.",
+            "created_at": "2026-10-05T04:16:18.719330+00:00",
+            "title": "Design critique",
+            "room_id": "cypress",
+            "booking_id": "16dd232a-a851-4dce-8534-e2b324dae6f6"
+          },
+          {
+            "kind": "calendar_attempt",
+            "detail": "Calendar attempt 6 for revision 1.",
+            "created_at": "2026-10-05T04:16:18.700498+00:00",
+            "title": "Design critique",
+            "room_id": "cypress",
+            "booking_id": "16dd232a-a851-4dce-8534-e2b324dae6f6"
+          },
+          {
+            "kind": "calendar_retry",
+            "detail": "Calendar response uncertain. Room allocation retained; reconciliation queued.",
+            "created_at": "2026-10-05T04:16:18.679970+00:00",
+            "title": "Design critique",
+            "room_id": "cypress",
+            "booking_id": "16dd232a-a851-4dce-8534-e2b324dae6f6"
+          },
+          {
+            "kind": "calendar_attempt",
+            "detail": "Calendar attempt 5 for revision 1.",
+            "created_at": "2026-10-05T04:16:18.661738+00:00",
+            "title": "Design critique",
+            "room_id": "cypress",
+            "booking_id": "16dd232a-a851-4dce-8534-e2b324dae6f6"
+          },
+          {
+            "kind": "calendar_retry",
+            "detail": "Calendar response uncertain. Room allocation retained; reconciliation queued.",
+            "created_at": "2026-10-05T04:16:18.642155+00:00",
+            "title": "Design critique",
+            "room_id": "cypress",
+            "booking_id": "16dd232a-a851-4dce-8534-e2b324dae6f6"
+          },
+          {
+            "kind": "calendar_attempt",
+            "detail": "Calendar attempt 4 for revision 1.",
+            "created_at": "2026-10-05T04:16:18.620628+00:00",
+            "title": "Design critique",
+            "room_id": "cypress",
+            "booking_id": "16dd232a-a851-4dce-8534-e2b324dae6f6"
+          },
+          {
+            "kind": "calendar_retry",
+            "detail": "Calendar response uncertain. Room allocation retained; reconciliation queued.",
+            "created_at": "2026-10-05T04:16:18.601002+00:00",
+            "title": "Design critique",
+            "room_id": "cypress",
+            "booking_id": "16dd232a-a851-4dce-8534-e2b324dae6f6"
+          },
+          {
+            "kind": "calendar_attempt",
+            "detail": "Calendar attempt 3 for revision 1.",
+            "created_at": "2026-10-05T04:16:18.582392+00:00",
+            "title": "Design critique",
+            "room_id": "cypress",
+            "booking_id": "16dd232a-a851-4dce-8534-e2b324dae6f6"
+          },
+          {
+            "kind": "calendar_retry",
+            "detail": "Calendar response uncertain. Room allocation retained; reconciliation queued.",
+            "created_at": "2026-10-05T04:16:18.561041+00:00",
+            "title": "Design critique",
+            "room_id": "cypress",
+            "booking_id": "16dd232a-a851-4dce-8534-e2b324dae6f6"
+          },
+          {
+            "kind": "calendar_attempt",
+            "detail": "Calendar attempt 2 for revision 1.",
+            "created_at": "2026-10-05T04:16:18.541289+00:00",
+            "title": "Design critique",
+            "room_id": "cypress",
+            "booking_id": "16dd232a-a851-4dce-8534-e2b324dae6f6"
+          },
+          {
+            "kind": "calendar_retry",
+            "detail": "Calendar response uncertain. Room allocation retained; reconciliation queued.",
+            "created_at": "2026-10-05T04:16:18.520689+00:00",
+            "title": "Design critique",
+            "room_id": "cypress",
+            "booking_id": "16dd232a-a851-4dce-8534-e2b324dae6f6"
+          },
+          {
+            "kind": "calendar_attempt",
+            "detail": "Calendar attempt 1 for revision 1.",
+            "created_at": "2026-10-05T04:16:18.501807+00:00",
+            "title": "Design critique",
+            "room_id": "cypress",
+            "booking_id": "16dd232a-a851-4dce-8534-e2b324dae6f6"
+          },
+          {
+            "kind": "calendar_synced",
+            "detail": "Calendar revision 1 reconciled without a duplicate event.",
+            "created_at": "2026-10-05T04:16:18.451668+00:00",
+            "title": "Quiet writing hour",
+            "room_id": "loft",
+            "booking_id": "6027b162-c604-4472-b31e-aeab4dbb798d"
+          },
+          {
+            "kind": "calendar_attempt",
+            "detail": "Calendar attempt 1 for revision 1.",
+            "created_at": "2026-10-05T04:16:18.434384+00:00",
+            "title": "Quiet writing hour",
+            "room_id": "loft",
+            "booking_id": "6027b162-c604-4472-b31e-aeab4dbb798d"
+          },
+          {
+            "kind": "calendar_synced",
+            "detail": "Calendar revision 1 reconciled without a duplicate event.",
+            "created_at": "2026-10-05T04:16:18.415264+00:00",
+            "title": "Presentation rehearsal",
+            "room_id": "studio",
+            "booking_id": "bce134a7-5821-41dc-ab69-fae45b3084b3"
+          }
+        ],
+        "scope": "Current workspace session; calendar simulator",
+        "latency_definition": "p95 seconds from outbox enqueue to successful reconciliation, including retries; completed jobs only"
+      },
+      "booking_ids": [
+        "fe55205b-7425-4145-b068-d73ffdfa1e27",
+        "8767418f-a792-4d38-963a-cab9b405bed5",
+        "79312198-d01b-47cf-a129-46f88b95deb2",
+        "7e0e86cc-8ff9-48d8-aafe-7d336898f6c9",
+        "159fb27d-f877-483c-9cfc-c0a7002d55b7",
+        "886c7e5f-1ce5-4681-bb6f-ca104ddea717",
+        "16dd232a-a851-4dce-8534-e2b324dae6f6",
+        "708870e5-4c99-4824-8637-fdbd8d5a9a8c",
+        "591f4c4d-5cbe-48d5-8937-e9b44d6d8bf2",
+        "23ca7928-a53c-4557-9188-c6a6d7158202",
+        "bce134a7-5821-41dc-ab69-fae45b3084b3",
+        "6027b162-c604-4472-b31e-aeab4dbb798d"
+      ]
+    },
+    "Ashley": {
+      "created": 12,
+      "metrics": {
+        "confirmed": 10,
+        "cancelled": 2,
+        "pending": 1,
+        "needs_review": 1,
+        "synced": 10,
+        "jobs": 15,
+        "retried": 1,
+        "sync_p95_seconds": 0.8905327999999999,
+        "oldest_pending_seconds": 1.364199,
+        "worker": {
+          "seen_at": "2026-10-05T04:16:20.657980+00:00",
+          "online": true
+        },
+        "history": [
+          {
+            "kind": "needs_review",
+            "detail": "Calendar response uncertain. Room allocation retained; reconciliation requires review.",
+            "created_at": "2026-10-05T04:16:20.677563+00:00",
+            "title": "Exam revision",
+            "room_id": "maple",
+            "booking_id": "1b7d8e16-dd2d-43b9-8852-9537fec5b338"
+          },
+          {
+            "kind": "calendar_attempt",
+            "detail": "Calendar attempt 6 for revision 1.",
+            "created_at": "2026-10-05T04:16:20.657980+00:00",
+            "title": "Exam revision",
+            "room_id": "maple",
+            "booking_id": "1b7d8e16-dd2d-43b9-8852-9537fec5b338"
+          },
+          {
+            "kind": "calendar_retry",
+            "detail": "Calendar response uncertain. Room allocation retained; reconciliation queued.",
+            "created_at": "2026-10-05T04:16:20.637915+00:00",
+            "title": "Exam revision",
+            "room_id": "maple",
+            "booking_id": "1b7d8e16-dd2d-43b9-8852-9537fec5b338"
+          },
+          {
+            "kind": "calendar_attempt",
+            "detail": "Calendar attempt 5 for revision 1.",
+            "created_at": "2026-10-05T04:16:20.618658+00:00",
+            "title": "Exam revision",
+            "room_id": "maple",
+            "booking_id": "1b7d8e16-dd2d-43b9-8852-9537fec5b338"
+          },
+          {
+            "kind": "calendar_retry",
+            "detail": "Calendar response uncertain. Room allocation retained; reconciliation queued.",
+            "created_at": "2026-10-05T04:16:20.599758+00:00",
+            "title": "Exam revision",
+            "room_id": "maple",
+            "booking_id": "1b7d8e16-dd2d-43b9-8852-9537fec5b338"
+          },
+          {
+            "kind": "calendar_attempt",
+            "detail": "Calendar attempt 4 for revision 1.",
+            "created_at": "2026-10-05T04:16:20.582705+00:00",
+            "title": "Exam revision",
+            "room_id": "maple",
+            "booking_id": "1b7d8e16-dd2d-43b9-8852-9537fec5b338"
+          },
+          {
+            "kind": "calendar_retry",
+            "detail": "Calendar response uncertain. Room allocation retained; reconciliation queued.",
+            "created_at": "2026-10-05T04:16:20.563721+00:00",
+            "title": "Exam revision",
+            "room_id": "maple",
+            "booking_id": "1b7d8e16-dd2d-43b9-8852-9537fec5b338"
+          },
+          {
+            "kind": "calendar_attempt",
+            "detail": "Calendar attempt 3 for revision 1.",
+            "created_at": "2026-10-05T04:16:20.546372+00:00",
+            "title": "Exam revision",
+            "room_id": "maple",
+            "booking_id": "1b7d8e16-dd2d-43b9-8852-9537fec5b338"
+          },
+          {
+            "kind": "calendar_retry",
+            "detail": "Calendar response uncertain. Room allocation retained; reconciliation queued.",
+            "created_at": "2026-10-05T04:16:20.527114+00:00",
+            "title": "Exam revision",
+            "room_id": "maple",
+            "booking_id": "1b7d8e16-dd2d-43b9-8852-9537fec5b338"
+          },
+          {
+            "kind": "calendar_attempt",
+            "detail": "Calendar attempt 2 for revision 1.",
+            "created_at": "2026-10-05T04:16:20.505608+00:00",
+            "title": "Exam revision",
+            "room_id": "maple",
+            "booking_id": "1b7d8e16-dd2d-43b9-8852-9537fec5b338"
+          },
+          {
+            "kind": "calendar_retry",
+            "detail": "Calendar response uncertain. Room allocation retained; reconciliation queued.",
+            "created_at": "2026-10-05T04:16:20.486554+00:00",
+            "title": "Exam revision",
+            "room_id": "maple",
+            "booking_id": "1b7d8e16-dd2d-43b9-8852-9537fec5b338"
+          },
+          {
+            "kind": "calendar_attempt",
+            "detail": "Calendar attempt 1 for revision 1.",
+            "created_at": "2026-10-05T04:16:20.467504+00:00",
+            "title": "Exam revision",
+            "room_id": "maple",
+            "booking_id": "1b7d8e16-dd2d-43b9-8852-9537fec5b338"
+          },
+          {
+            "kind": "calendar_synced",
+            "detail": "Calendar revision 1 reconciled without a duplicate event.",
+            "created_at": "2026-10-05T04:16:20.414800+00:00",
+            "title": "Design critique",
+            "room_id": "cedar",
+            "booking_id": "f1a7dc1d-a4c7-48a5-a560-7a5118d20ce5"
+          },
+          {
+            "kind": "calendar_attempt",
+            "detail": "Calendar attempt 1 for revision 1.",
+            "created_at": "2026-10-05T04:16:20.397353+00:00",
+            "title": "Design critique",
+            "room_id": "cedar",
+            "booking_id": "f1a7dc1d-a4c7-48a5-a560-7a5118d20ce5"
+          },
+          {
+            "kind": "manual_retry",
+            "detail": "Calendar reconciliation requeued by the booking owner.",
+            "created_at": "2026-10-05T04:16:20.384614+00:00",
+            "title": "Design critique",
+            "room_id": "cedar",
+            "booking_id": "f1a7dc1d-a4c7-48a5-a560-7a5118d20ce5"
+          },
+          {
+            "kind": "needs_review",
+            "detail": "Calendar response uncertain. Room allocation retained; reconciliation requires review.",
+            "created_at": "2026-10-05T04:16:20.346202+00:00",
+            "title": "Design critique",
+            "room_id": "cedar",
+            "booking_id": "f1a7dc1d-a4c7-48a5-a560-7a5118d20ce5"
+          },
+          {
+            "kind": "calendar_attempt",
+            "detail": "Calendar attempt 6 for revision 1.",
+            "created_at": "2026-10-05T04:16:20.327341+00:00",
+            "title": "Design critique",
+            "room_id": "cedar",
+            "booking_id": "f1a7dc1d-a4c7-48a5-a560-7a5118d20ce5"
+          },
+          {
+            "kind": "calendar_retry",
+            "detail": "Calendar response uncertain. Room allocation retained; reconciliation queued.",
+            "created_at": "2026-10-05T04:16:20.306879+00:00",
+            "title": "Design critique",
+            "room_id": "cedar",
+            "booking_id": "f1a7dc1d-a4c7-48a5-a560-7a5118d20ce5"
+          },
+          {
+            "kind": "calendar_attempt",
+            "detail": "Calendar attempt 5 for revision 1.",
+            "created_at": "2026-10-05T04:16:20.287465+00:00",
+            "title": "Design critique",
+            "room_id": "cedar",
+            "booking_id": "f1a7dc1d-a4c7-48a5-a560-7a5118d20ce5"
+          },
+          {
+            "kind": "calendar_retry",
+            "detail": "Calendar response uncertain. Room allocation retained; reconciliation queued.",
+            "created_at": "2026-10-05T04:16:20.267511+00:00",
+            "title": "Design critique",
+            "room_id": "cedar",
+            "booking_id": "f1a7dc1d-a4c7-48a5-a560-7a5118d20ce5"
+          },
+          {
+            "kind": "calendar_attempt",
+            "detail": "Calendar attempt 4 for revision 1.",
+            "created_at": "2026-10-05T04:16:20.250160+00:00",
+            "title": "Design critique",
+            "room_id": "cedar",
+            "booking_id": "f1a7dc1d-a4c7-48a5-a560-7a5118d20ce5"
+          },
+          {
+            "kind": "calendar_retry",
+            "detail": "Calendar response uncertain. Room allocation retained; reconciliation queued.",
+            "created_at": "2026-10-05T04:16:20.229936+00:00",
+            "title": "Design critique",
+            "room_id": "cedar",
+            "booking_id": "f1a7dc1d-a4c7-48a5-a560-7a5118d20ce5"
+          },
+          {
+            "kind": "calendar_attempt",
+            "detail": "Calendar attempt 3 for revision 1.",
+            "created_at": "2026-10-05T04:16:20.211822+00:00",
+            "title": "Design critique",
+            "room_id": "cedar",
+            "booking_id": "f1a7dc1d-a4c7-48a5-a560-7a5118d20ce5"
+          },
+          {
+            "kind": "calendar_retry",
+            "detail": "Calendar response uncertain. Room allocation retained; reconciliation queued.",
+            "created_at": "2026-10-05T04:16:20.186872+00:00",
+            "title": "Design critique",
+            "room_id": "cedar",
+            "booking_id": "f1a7dc1d-a4c7-48a5-a560-7a5118d20ce5"
+          },
+          {
+            "kind": "calendar_attempt",
+            "detail": "Calendar attempt 2 for revision 1.",
+            "created_at": "2026-10-05T04:16:20.167276+00:00",
+            "title": "Design critique",
+            "room_id": "cedar",
+            "booking_id": "f1a7dc1d-a4c7-48a5-a560-7a5118d20ce5"
+          },
+          {
+            "kind": "calendar_retry",
+            "detail": "Calendar response uncertain. Room allocation retained; reconciliation queued.",
+            "created_at": "2026-10-05T04:16:20.148593+00:00",
+            "title": "Design critique",
+            "room_id": "cedar",
+            "booking_id": "f1a7dc1d-a4c7-48a5-a560-7a5118d20ce5"
+          },
+          {
+            "kind": "calendar_attempt",
+            "detail": "Calendar attempt 1 for revision 1.",
+            "created_at": "2026-10-05T04:16:20.130554+00:00",
+            "title": "Design critique",
+            "room_id": "cedar",
+            "booking_id": "f1a7dc1d-a4c7-48a5-a560-7a5118d20ce5"
+          },
+          {
+            "kind": "calendar_synced",
+            "detail": "Calendar revision 1 reconciled without a duplicate event.",
+            "created_at": "2026-10-05T04:16:20.083591+00:00",
+            "title": "Quiet writing hour",
+            "room_id": "fern",
+            "booking_id": "ffda44eb-09cb-4f20-b7f5-29c51bfc33d7"
+          },
+          {
+            "kind": "calendar_attempt",
+            "detail": "Calendar attempt 1 for revision 1.",
+            "created_at": "2026-10-05T04:16:20.060158+00:00",
+            "title": "Quiet writing hour",
+            "room_id": "fern",
+            "booking_id": "ffda44eb-09cb-4f20-b7f5-29c51bfc33d7"
+          },
+          {
+            "kind": "calendar_synced",
+            "detail": "Calendar revision 1 reconciled without a duplicate event.",
+            "created_at": "2026-10-05T04:16:20.038249+00:00",
+            "title": "Presentation rehearsal",
+            "room_id": "aspen",
+            "booking_id": "62a91fee-a56b-4d0e-aee0-b8efe0f9c8ce"
+          }
+        ],
+        "scope": "Current workspace session; calendar simulator",
+        "latency_definition": "p95 seconds from outbox enqueue to successful reconciliation, including retries; completed jobs only"
+      },
+      "booking_ids": [
+        "56e49e5c-0841-4530-88a6-99c2fef32c0b",
+        "461cf5c6-ea26-4029-9134-333066eaa4e5",
+        "b488b08b-db84-4366-b794-9f340f9eeceb",
+        "0ab02ed8-75b9-48f5-beec-fd2f8af23445",
+        "f548feb9-fe32-4b92-8b5a-11268b9e4b19",
+        "85718920-f35c-434a-be7d-9fb4a56433b1",
+        "f1a7dc1d-a4c7-48a5-a560-7a5118d20ce5",
+        "1b7d8e16-dd2d-43b9-8852-9537fec5b338",
+        "311f9dca-9417-4210-8eea-cc237acd54b1",
+        "bc9bb47a-f264-4709-b74e-60fb1a46f37f",
+        "62a91fee-a56b-4d0e-aee0-b8efe0f9c8ce",
+        "ffda44eb-09cb-4f20-b7f5-29c51bfc33d7"
+      ]
+    }
+  }
+}
