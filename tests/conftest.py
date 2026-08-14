@@ -49,6 +49,7 @@ from app.infrastructure.models import (
     RoomModel,
     UserModel,
 )
+from app.reliability.failure_injection import injector
 
 TABLES = [
     "saga_events",
@@ -147,9 +148,11 @@ async def session_factory(engine) -> AsyncIterator[async_sessionmaker[AsyncSessi
         await session.commit()
 
     database.set_session_factory(factory)
+    injector.disarm()
     try:
         yield factory
     finally:
+        injector.disarm()
         database.set_session_factory(None)
 
 
