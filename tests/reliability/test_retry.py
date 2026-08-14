@@ -53,6 +53,42 @@ def test_classification_of_failures(error, expected):
     assert is_retryable(error) is expected
 
 
+class _ProviderError(Exception):
+    """Shaped like an LLM SDK error: carries an HTTP status."""
+
+    def __init__(self, status_code: int) -> None:
+        self.status_code = status_code
+        super().__init__(f"provider returned {status_code}")
+
+
+@pytest.mark.parametrize(
+    ("status", "expected"),
+    [
+        (429, True),  # rate limited: back off and come back
+        (500, True),
+        (502, True),
+        (503, True),
+        (408, True),
+        (401, False),  # bad key: will be a 401 forever
+        (403, False),
+        (400, False),  # malformed request
+        (404, False),
+        (422, False),
+    ],
+)
+def test_provider_errors_are_classified_by_http_status(status, expected):
+    assert is_retryable(_ProviderError(status)) is expected
+
+
+def test_status_classification_beats_the_builtin_tuple():
+    """Some SDKs subclass ConnectionError for errors that are not transient."""
+
+    class SdkConnectionError(ConnectionError):
+        status_code = 401
+
+    assert is_retryable(SdkConnectionError()) is False
+
+
 # --- Behaviour -------------------------------------------------------------
 
 

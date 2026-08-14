@@ -28,9 +28,36 @@ _RETRYABLE_BUILTINS: tuple[type[BaseException], ...] = (
 )
 
 
+#: HTTP statuses worth another attempt. Everything else a provider returns is
+#: a statement about the request, not about the provider's health: a 401 will
+#: still be a 401, and a 400 will still be malformed.
+_RETRYABLE_STATUSES = frozenset({408, 409, 425, 429})
+
+
+def http_status_of(error: BaseException) -> int | None:
+    """Best-effort status extraction across provider SDK exception shapes."""
+    for candidate in (
+        getattr(error, "status_code", None),
+        getattr(getattr(error, "response", None), "status_code", None),
+        getattr(error, "code", None),
+    ):
+        if isinstance(candidate, int):
+            return candidate
+    return None
+
+
 def is_retryable(error: BaseException) -> bool:
     if isinstance(error, HuddleError):
         return error.retryable
+
+    # Provider SDK errors are classified by status rather than by type, so a
+    # new exception class from an SDK upgrade does not silently become
+    # retryable. Checked before the builtin tuple because some SDKs subclass
+    # ConnectionError for errors that are anything but transient.
+    status = http_status_of(error)
+    if status is not None:
+        return status in _RETRYABLE_STATUSES or status >= 500
+
     return isinstance(error, _RETRYABLE_BUILTINS)
 
 
