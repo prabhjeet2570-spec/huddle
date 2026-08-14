@@ -1,5 +1,10 @@
 """Initial schema: tenancy, reservations, conversations and reliability telemetry.
 
+The reservations table carries the exclusion constraint that makes double
+booking impossible. It needs the btree_gist extension, because the constraint
+mixes an equality operator on a scalar column with an overlap operator on a
+range column, and stock GiST cannot index the scalar half.
+
 Revision ID: 25619cc03af8
 Revises: 
 Create Date: 2026-09-05 19:36:35.979445
@@ -15,6 +20,7 @@ depends_on = None
 
 
 def upgrade() -> None:
+    op.execute("CREATE EXTENSION IF NOT EXISTS btree_gist")
     op.create_table('alerts',
     sa.Column('id', sa.UUID(), nullable=False),
     sa.Column('org_id', sa.UUID(), nullable=True),
@@ -214,6 +220,7 @@ def upgrade() -> None:
     sa.Column('hold_expires_at', sa.DateTime(timezone=True), nullable=True),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
+    postgresql.ExcludeConstraint((sa.column('room_id'), '='), (sa.column('period'), '&&'), where=sa.text("state IN ('held', 'confirmed')"), using='gist', name='ex_reservations_no_overlap'),
     sa.CheckConstraint("(state <> 'held') OR (hold_expires_at IS NOT NULL)", name='ck_reservations_hold_has_deadline'),
     sa.CheckConstraint("state IN ('held', 'confirmed', 'cancelled', 'expired')", name='ck_reservations_state'),
     sa.CheckConstraint('attendees > 0', name='ck_reservations_attendees_positive'),
@@ -259,3 +266,4 @@ def downgrade() -> None:
     op.drop_table('calendar_entries')
     op.drop_index('ix_alerts_kind_time', table_name='alerts')
     op.drop_table('alerts')
+    op.execute("DROP EXTENSION IF EXISTS btree_gist")
