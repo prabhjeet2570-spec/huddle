@@ -92,8 +92,8 @@ budget, while the immutable event history retains previous attempts.
 Synchronization p95 is PostgreSQL's continuous percentile of elapsed seconds
 from enqueue to completion for jobs in `done`. It includes waiting and retry
 backoff. Unresolved and superseded jobs are excluded from this latency distribution,
-so pending/review counts must be read alongside it. A null percentile displays
-an em dash, never a fabricated zero. The worker heartbeat is fresh for 15 seconds;
+so pending/review counts must be read alongside it. The API returns null when no
+completed samples exist; the UI does not display this percentile. The worker heartbeat is fresh for 15 seconds;
 it is a liveness signal, not proof of successful synchronization.
 
 ## Storage and operations

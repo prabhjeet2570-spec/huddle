@@ -1,4 +1,11 @@
-# Validation record — 2026-10-04
+# Validation record — October 4–5, 2026
+
+The latest verification is the numbered-room section below: 68 automated tests,
+16 live-model scenarios, four crash/recovery trials, and the populated profile
+checks. Earlier sections are a chronological record; their room names and test
+counts describe those earlier versions. `assistant-evaluation.json` is overwritten
+by each run and currently contains the latest 16-scenario run, not the older runs.
+
 
 - Python 3.12.13, macOS arm64, local PostgreSQL 16 container.
 - Before the LangGraph migration, 50 tests passed with `TEST_DATABASE_URL` set to the isolated `huddle_test` database.
@@ -23,8 +30,8 @@ with a correct proposal card. Clicking approval created the booking.
 
 A subsequent live evaluation ran 12 scenarios, then repeated them with an
 occupied-room scenario added. All 13 scenarios in the recorded second run passed
-the scripted checks. The [raw responses and checks](../artifacts/assistant-evaluation.json)
-include exact requests, missing times/attendees, follow-up details, proposal edits,
+the scripted checks. The latest [raw responses and checks](../artifacts/assistant-evaluation.json)
+cover these cases plus the expanded catalog, and include exact requests, missing times/attendees, follow-up details, proposal edits,
 capacity overflow, unknown rooms, past dates, chat approval bypass attempts,
 listing, cancellation requests, local-time conversion, and an occupied room.
 Every case checks that chat created zero bookings; proposal cases check selected
@@ -55,7 +62,9 @@ Unit/integration assistant tests use controlled model responses and are separate
 The screenshots in `screenshots/` were captured from the running local application.
 Room illustrations are locally authored SVG assets. Meetings are synthetic data
 entered during the walkthrough. No dashboard values were hardcoded or edited into
-screenshots. The assistant screenshot shows an actual live-model proposal.
+screenshots. The current chat-proposal screenshot shows a live-model proposal; the assistant
+and chat-confirmed screenshots show the server-generated confirmation after its
+approval. Scripted conflict screenshots are separate evidence.
 
 ## History and repeatability
 
@@ -84,7 +93,8 @@ conflict alternatives with fresh approval, no-availability exhaustion, owner iso
 and reset. Existing booking and calendar-worker tests also passed.
 
 The 13 live OpenRouter scenarios were rerun against LangGraph; all scripted checks
-passed. `artifacts/assistant-evaluation.json` now records that run. These checks
+passed at that stage. The evaluation artifact has since been replaced by the
+latest numbered-room run. These checks
 retain the limitations described above; guided demos are not live-model evidence.
 
 `uv run python scripts/workflow_demo.py` (with `TEST_DATABASE_URL` set) prepares a
@@ -120,7 +130,8 @@ The handler now checks availability before saving a proposal. Returning a tool
 error to the model still caused repeated calls in the first rerun (12/13 passed),
 so an occupied-room response now ends deterministically with available alternatives
 and no pending proposal. The final live rerun passed all **13 scenarios**; the raw
-results replace `artifacts/assistant-evaluation.json`. This does not hold a room;
+results replaced `artifacts/assistant-evaluation.json` at that stage; its current
+contents are the later 16-scenario run. This does not hold a room;
 approval still checks for later conflicts.
 The occupied-room regression brings the automated suite to **59 passing tests**.
 
@@ -168,3 +179,8 @@ Desktop checks used 1280px; mobile directory and chat used 390px with body width
 The primary UI no longer shows the Workspace breadcrumb, simulator paragraph,
 calendar explainer or completed-only latency claim. The provider/simulator boundary
 remains documented in the README.
+
+The recovery rerun records the checked-out baseline hash `e5ef98e`; worker/fault
+changes were still uncommitted during execution and were subsequently committed
+in `32ce785`. The recorded hash alone does not identify the complete working tree
+used for that trial. The source field was preserved rather than relabeled.

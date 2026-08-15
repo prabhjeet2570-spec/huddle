@@ -26,6 +26,14 @@ this runner claims the fault-trial jobs. For example, start the API and calendar
 separately, enable sample profiles, and run:
 
 ```bash
+# Apply migrations once, with PostgreSQL running.
+uv run python -m app.db
+
+# In separate terminals; leave the worker stopped during population.
+uv run uvicorn app.main:app --host 127.0.0.1 --port 8010
+uv run uvicorn app.calendar_simulator:app --host 127.0.0.1 --port 8001
+
+# In a third terminal.
 uv run python scripts/populate_demo.py
 ```
 
