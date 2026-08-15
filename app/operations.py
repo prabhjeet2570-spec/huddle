@@ -36,11 +36,19 @@ def metrics(user=Depends(current_user)):
             FROM booking_events e JOIN bookings b ON b.id=e.booking_id WHERE b.owner_id=%s ORDER BY e.id DESC LIMIT 30""",
             (user["id"],),
         ).fetchall()
+        booking_history = conn.execute(
+            """SELECT e.kind,e.detail,e.created_at,b.title,b.room_id,b.id AS booking_id
+            FROM booking_events e JOIN bookings b ON b.id=e.booking_id
+            WHERE b.owner_id=%s AND e.kind IN ('confirmed','rescheduled','cancelled')
+            ORDER BY e.id DESC LIMIT 30""",
+            (user["id"],),
+        ).fetchall()
     return {
         **totals,
         **jobs,
         "worker": heartbeat,
         "history": history,
+        "booking_history": booking_history,
         "scope": "Current workspace session; calendar simulator",
         "latency_definition": "p95 seconds from outbox enqueue to successful reconciliation, including retries; completed jobs only",
     }

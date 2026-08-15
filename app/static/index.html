@@ -130,11 +130,9 @@
             <div>
               <p class="eyebrow">RESERVATION STATUS</p>
               <h1>Booking activity</h1>
-              <p>Track your reservations and calendar updates.</p>
+              <p>See when rooms were booked, changed, or cancelled.</p>
             </div>
-            <span class="badge neutral" id="worker-status"
-              >Checking updates</span
-            >
+
           </div>
           <div class="metrics" id="metrics"></div>
 
@@ -145,6 +143,14 @@
 
               </div>
               <div id="activity"></div>
+              <details class="technical-details" id="calendar-details">
+                <summary>Technical demo details</summary>
+                <p>Calendar synchronization is a background reliability demonstration. It does not determine whether your room is reserved. Events below are history, not the current status of each booking.</p>
+                <span class="badge neutral" id="worker-status">Checking updates</span>
+                <div class="metrics" id="calendar-metrics"></div>
+                <h3>Calendar processing history</h3>
+                <div id="calendar-activity"></div>
+              </details>
             </div>
 
           </div>

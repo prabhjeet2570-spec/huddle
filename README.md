@@ -18,6 +18,9 @@ scraping, or public deployment requirement.
   leave the room reserved, retry automatically, and become visible review tasks
   when the retry budget is exhausted.
 
+Calendar processing details stay collapsed under **Technical demo details**; the
+main booking screens show reservation status and booking history.
+
 The UI, API, database, worker, and HTTP calendar simulator are runnable locally.
 This is a portfolio/demo application, not a deployed production booking service.
 
@@ -158,7 +161,7 @@ reproducible development. LangSmith tracing is not required.
 
 ## Measured evidence
 
-The current suite passes 68 tests. A [separate-process restart experiment](artifacts/workflow-restart.json)
+The current suite passes 69 tests. A [separate-process restart experiment](artifacts/workflow-restart.json)
 restores an approval checkpoint and verifies repeated approval creates one booking.
 Run it with `TEST_DATABASE_URL=.../huddle_test uv run python scripts/workflow_demo.py`.
 
@@ -210,7 +213,7 @@ uv run pytest -q
 uv run python scripts/recovery_demo.py
 ```
 
-The validated suite has **68 passing cases**, including actual PostgreSQL
+The validated suite has **69 passing cases**, including actual PostgreSQL
 contention, direct constraint enforcement, owner isolation, exact-action approval,
 lease recovery, and retry exhaustion. The recovery script deliberately exits
 worker subprocesses, waits for real lease expiry, and overwrites the raw results
@@ -257,15 +260,22 @@ view; they include successful and failed update states rather than only empty pa
 ![Cancelled bookings](docs/screenshots/cancelled-bookings.jpg)
 
 </details>
-<details><summary>Calendar failures and retry activity</summary>
+<details><summary>Booking activity and optional technical details</summary>
 
-![Booking activity with pending and failed updates](docs/screenshots/reliability.jpg)
+![Booking activity](docs/screenshots/reliability.jpg)
+
+![Optional calendar diagnostics](docs/screenshots/technical-activity.jpg)
+
+![Retry inside technical details](docs/screenshots/calendar-retry.jpg)
+
+![Recovered update](docs/screenshots/calendar-recovered.jpg)
 
 </details>
 <details><summary>Mobile directory and assistant</summary>
 
 ![Mobile room discovery](docs/screenshots/mobile.jpg)
 ![Mobile assistant](docs/screenshots/mobile-chat.jpg)
+![Mobile booking activity](docs/screenshots/mobile-activity.jpg)
 
 </details>
 

@@ -1564,3 +1564,10 @@ h1 { font-family: Georgia, serif; font-weight: 500; font-size: 34px; letter-spac
 .floor-control select { width: auto; padding: 7px 10px; border: 1px solid var(--line); border-radius: 4px; background: white; }
 .sample-flows { margin-top: 14px; font-size: 12px; }
 .sample-flows button { display: block; margin-top: 8px; }
+
+#metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.booking-technical { margin-top: 12px; color: var(--muted); font-size: 12px; }
+.booking-technical summary { cursor: pointer; }
+.booking-technical p { line-height: 1.6; margin: 10px 0; }
+#calendar-details { margin-top: 24px; }
+#calendar-metrics { margin-top: 16px; grid-template-columns: repeat(2, minmax(0, 1fr)); }

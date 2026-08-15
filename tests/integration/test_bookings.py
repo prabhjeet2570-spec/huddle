@@ -148,3 +148,18 @@ def test_unauthenticated_api():
             assert (await c.get("/bookings")).status_code == 401
 
     asyncio.run(run())
+
+
+def test_booking_activity_survives_calendar_event_volume(api):
+    b = api("POST", "/bookings", json=payload()).json()
+    with connect() as conn:
+        for _ in range(35):
+            conn.execute(
+                "INSERT INTO booking_events(booking_id,kind,detail) VALUES (%s,'calendar_retry','test retry')",
+                (b["id"],),
+            )
+    metrics = api("GET", "/metrics").json()
+    assert all(h["kind"] == "calendar_retry" for h in metrics["history"])
+    assert [h["kind"] for h in metrics["booking_history"]] == ["confirmed"]
+    api("POST", "/session", json={"name": "Other student"})
+    assert api("GET", "/metrics").json()["booking_history"] == []

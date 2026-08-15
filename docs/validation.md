@@ -1,6 +1,6 @@
 # Validation record — October 4–5, 2026
 
-The latest verification is the numbered-room section below: 68 automated tests,
+The latest verification includes the reservation-focused UI section below: 69 automated tests,
 16 live-model scenarios, four crash/recovery trials, and the populated profile
 checks. Earlier sections are a chronological record; their room names and test
 counts describe those earlier versions. `assistant-evaluation.json` is overwritten
@@ -184,3 +184,17 @@ The recovery rerun records the checked-out baseline hash `e5ef98e`; worker/fault
 changes were still uncommitted during execution and were subsequently committed
 in `32ce785`. The recorded hash alone does not identify the complete working tree
 used for that trial. The source field was preserved rather than relabeled.
+
+## Reservation-focused UI finish
+
+The suite passed **69 tests** after separating booking history from calendar
+processing history. The added regression floods calendar history with 35 retries
+and verifies that the booking event remains in the primary activity response and
+that another owner cannot read it. Lint, formatting and JavaScript syntax passed.
+
+Browser checks verified that calendar failures are absent from the main activity
+screen and primary booking badges. The collapsed technical section retains worker
+metrics and historical processing events. Retrying Morgan’s Room 302 from its
+booking disclosure completed the calendar update while the room stayed confirmed;
+the disclosure remained open through the refresh. Current screenshots show the
+reservation-focused screens and separate expanded technical views.

@@ -17,9 +17,13 @@ size. That message is stored in conversation history, so refresh shows the same
 confirmation. Repeating approval returns the same booking and does not add another
 confirmation. Room conflicts still require a fresh proposal and approval.
 
-Calendar status stays on bookings because it explains pending work and exposes the
-Retry update action. The technology description and simulator limitations live in
-the README. Booking activity shows actual persisted events and user-scoped counts.
+Reservation status is the primary booking signal. Calendar status and Retry update
+live in a collapsed **Technical demo details** disclosure on each booking. Open
+disclosures remain open across background refreshes. The main activity page shows
+only booked, changed and cancelled events; a separate collapsed section contains
+worker status, calendar counts and processing history. Historical events are clearly
+labeled as history rather than current booking state. The technology description
+and simulator limitations live in the README.
 The completed-only p95 is available through the API, not displayed as a product
 performance claim. Technical workflow traces are optional and collapsed.
 

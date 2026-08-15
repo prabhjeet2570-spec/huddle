@@ -157,13 +157,14 @@ async function loadBookings() {
   }
 }
 function renderBookings() {
+  const expanded = new Set($$("details[data-booking-tech][open]").map(el => el.dataset.bookingTech));
   const bookings = state.bookings.filter(b => state.filter === "past" ? b.status === "confirmed" && new Date(b.starts_at) <= new Date() : b.status === state.filter && (state.filter !== "confirmed" || new Date(b.starts_at) > new Date()));
   $("#booking-list").innerHTML = bookings.length
     ? bookings
         .map((b) => {
           const d = new Date(b.starts_at),
             future = d > new Date();
-          return `<article class="booking-card"><div class="date-box"><small>${d.toLocaleDateString(undefined, { month: "short" })}</small><b>${d.getDate()}</b></div><div class="booking-content"><h3>${escapeHTML(b.title)}</h3><div class="booking-meta">${escapeHTML(roomName(b.room_id))} &nbsp;·&nbsp; ${tm(b.starts_at)} – ${tm(b.ends_at)} &nbsp;·&nbsp; ${b.attendees} people</div><div class="booking-badges"><span class="badge ${b.status === "cancelled" ? "cancelled" : ""}">${b.status === "cancelled" ? "Cancelled" : future ? "Confirmed" : "Past booking"}</span><span class="badge ${b.calendar_status === "synced" ? "neutral" : "pending"}">${{ pending: "Calendar update pending", synced: "Calendar updated", needs_review: "Update needs attention" }[b.calendar_status]}</span></div><div id="events-${b.id}" class="hidden history-inline"></div></div><div class="booking-actions"><button class="button secondary" data-events="${b.id}">Activity</button>${b.calendar_status === "needs_review" ? `<button class="button secondary" data-retry="${b.id}">Retry update</button>` : ""}${b.status === "confirmed" && future ? `<button class="button secondary" data-edit="${b.id}">Edit</button><button class="button secondary" data-cancel="${b.id}">Cancel</button>` : ""}</div></article>`;
+          return `<article class="booking-card"><div class="date-box"><small>${d.toLocaleDateString(undefined, { month: "short" })}</small><b>${d.getDate()}</b></div><div class="booking-content"><h3>${escapeHTML(b.title)}</h3><div class="booking-meta">${escapeHTML(roomName(b.room_id))} &nbsp;·&nbsp; ${tm(b.starts_at)} – ${tm(b.ends_at)} &nbsp;·&nbsp; ${b.attendees} people</div><div class="booking-badges"><span class="badge ${b.status === "cancelled" ? "cancelled" : ""}">${b.status === "cancelled" ? "Cancelled" : future ? "Confirmed" : "Past booking"}</span></div><div id="events-${b.id}" class="hidden history-inline"></div><details class="booking-technical" data-booking-tech="${b.id}" ${expanded.has(b.id) ? "open" : ""}><summary>Technical demo details</summary><p>Current calendar state: <b>${{ pending: "Update pending", synced: "Updated", needs_review: "Needs attention" }[b.calendar_status]}</b>. This does not change your room reservation.</p>${b.calendar_status === "needs_review" ? `<button class="button secondary" data-retry="${b.id}">Retry update</button>` : ""}<div id="calendar-events-${b.id}"></div></details></div><div class="booking-actions"><button class="button secondary" data-events="${b.id}">Activity</button>${b.status === "confirmed" && future ? `<button class="button secondary" data-edit="${b.id}">Edit</button><button class="button secondary" data-cancel="${b.id}">Cancel</button>` : ""}</div></article>`;
         })
         .join("")
     : `<div class="empty-state"><span class="empty-symbol">▦</span><h3>${state.filter === "cancelled" ? "No cancelled bookings" : state.filter === "past" ? "No past bookings" : "No confirmed bookings"}</h3><p>${state.filter === "cancelled" ? "Cancelled bookings will appear here." : state.filter === "past" ? "Completed reservations will appear here." : "Choose a room and time to create a booking."}</p><button class="button primary" data-page="discover">Explore rooms →</button></div>`;
@@ -347,29 +348,25 @@ async function loadMetrics() {
     $("#worker-status").className =
       "badge " + (m.worker?.online ? "" : "pending");
     const cards = [
-      ["Confirmed bookings", m.confirmed, "Includes past reservations"],
-      [
-        "Calendar updated",
-        m.synced,
-        "Across confirmed & cancelled bookings",
-      ],
-      ["Waiting for calendar update", m.pending, "Scheduled to update"],
-      ["Updates needing attention", m.needs_review, "Open the booking to retry"],
+      ["Confirmed reservations", m.confirmed, "Includes past reservations"],
+      ["Cancelled reservations", m.cancelled, "Rooms released"],
     ];
-    $("#metrics").innerHTML = cards
-      .map(
-        ([label, value, note]) =>
-          `<div class="metric"><span class="label">${label}</span><strong>${value}</strong><small>${note}</small></div>`,
-      )
-      .join("");
-    $("#activity").innerHTML = m.history.length
-      ? m.history.filter(h => h.kind !== "calendar_attempt").slice(0, 12)
-          .map(
-            (h) =>
-              `<div class="activity-item"><span class="event-dot">${h.kind === "calendar_synced" ? "✓" : h.kind.includes("retry") ? "↻" : "·"}</span><div><b>${escapeHTML(h.title)} · ${escapeHTML(activityText(h.kind)[0])}</b><p>${escapeHTML(activityText(h.kind)[1])}</p><small>${dt(h.created_at)} · ${escapeHTML(roomName(h.room_id))}</small></div></div>`,
-          )
-          .join("")
-      : '<div class="empty-state"><h3>No activity yet</h3><p>Your booking and calendar updates will appear here.</p></div>';
+    const renderCards = cards => cards.map(([label, value, note]) =>
+      `<div class="metric"><span class="label">${label}</span><strong>${value}</strong><small>${note}</small></div>`).join("");
+    const renderActivity = events => events.map(h =>
+      `<div class="activity-item"><span class="event-dot">·</span><div><b>${escapeHTML(h.title)} · ${escapeHTML(activityText(h.kind)[0])}</b><p>${escapeHTML(activityText(h.kind)[1])}</p><small>${dt(h.created_at)} · ${escapeHTML(roomName(h.room_id))}</small></div></div>`).join("");
+    $("#metrics").innerHTML = renderCards(cards);
+    const history = m.booking_history || m.history.filter(h => ["confirmed", "rescheduled", "cancelled"].includes(h.kind));
+    $("#activity").innerHTML = history.length ? renderActivity(history) : '<div class="empty-state"><h3>No activity yet</h3><p>Your bookings, changes, and cancellations will appear here.</p></div>';
+    $("#calendar-metrics").innerHTML = renderCards([
+      ["Calendar updated", m.synced, "Includes cancelled reservations"],
+      ["Pending updates", m.pending, "Queued for the worker"],
+      ["Needs attention", m.needs_review, "Open a booking’s technical details to retry"],
+      ["Retried tasks", m.retried, `${m.jobs} total tasks`],
+    ]);
+    const technical = m.history.filter(h => !["confirmed", "rescheduled", "cancelled"].includes(h.kind));
+    $("#calendar-activity").innerHTML = technical.length ? renderActivity(technical) : '<p>No calendar events yet.</p>';
+
   } catch (e) {
     toast(e.message);
   }
@@ -406,12 +403,10 @@ async function actions(event) {
         const events = await api(
           "/bookings/" + target.dataset.events + "/events",
         );
-        el.innerHTML = events
-          .map(
-            (e) =>
-              `<p>${escapeHTML(activityText(e.kind)[0])} · ${escapeHTML(activityText(e.kind)[1])}<br><small>${dt(e.created_at)}</small></p>`,
-          )
-          .join("");
+        const render = events => events.map(e => `<p>${escapeHTML(activityText(e.kind)[0])} · ${escapeHTML(activityText(e.kind)[1])}<br><small>${dt(e.created_at)}</small></p>`).join("");
+        el.innerHTML = render(events.filter(e => ["confirmed", "rescheduled", "cancelled"].includes(e.kind)));
+        $("#calendar-events-" + target.dataset.events).innerHTML = '<p class="muted">Historical calendar events; the current state is shown above.</p>' + render(events.filter(e => !["confirmed", "rescheduled", "cancelled"].includes(e.kind)));
+
       }
     }
     if (target.dataset.retry) {

@@ -84,7 +84,10 @@ or immediate consistency between the room database and calendar.
 
 ## Metrics
 
-The dashboard queries stored rows for the current session. Counts include the
+The dashboard queries stored rows for the current session. Reservation activity
+is queried separately from calendar history so frequent worker attempts cannot
+bury booking events. The UI keeps calendar metrics and history in a collapsed
+technical disclosure. Counts include the
 current state of bookings, including calendar state of cancelled reservations.
 A retried job is an outbox row with `attempts > 1`; manual retry resets the attempt
 budget, while the immutable event history retains previous attempts.
