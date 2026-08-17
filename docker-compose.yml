@@ -17,5 +17,30 @@ services:
       timeout: 3s
       retries: 30
 
+  api:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      HUDDLE_DATABASE_URL: postgresql+asyncpg://huddle:huddle@db:5432/huddle
+      HUDDLE_JWT_SECRET: dev-only-secret-change-me-in-production-please
+      HUDDLE_LLM_API_KEY: ${HUDDLE_LLM_API_KEY:-}
+      HUDDLE_LLM_PROVIDER: ${HUDDLE_LLM_PROVIDER:-openai}
+      HUDDLE_SEED_ON_STARTUP: "true"
+      HUDDLE_SEED_USER_PASSWORD: ${HUDDLE_SEED_USER_PASSWORD:-huddle-dev-password}
+    ports:
+      - "8000:8000"
+
+  ui:
+    build: .
+    depends_on:
+      - api
+    command: ["streamlit", "run", "ui/app.py", "--server.port=8501", "--server.address=0.0.0.0"]
+    environment:
+      HUDDLE_API_BASE_URL: http://api:8000
+    ports:
+      - "8501:8501"
+
 volumes:
   db-data:
