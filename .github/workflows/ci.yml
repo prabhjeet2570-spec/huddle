@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+env:
+  HUDDLE_DATABASE_URL: postgresql+asyncpg://huddle:huddle@localhost:5432/huddle
+  HUDDLE_JWT_SECRET: ci-only-secret-not-used-anywhere-real
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install ruff==0.14.14
+      - name: Lint
+        run: ruff check app tests
+
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: huddle
+          POSTGRES_PASSWORD: huddle
+          POSTGRES_DB: huddle
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U huddle -d huddle"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements-dev.txt
+
+      - name: Install dependencies
+        run: pip install -r requirements-dev.txt
+
+      - name: Apply migrations
+        run: alembic upgrade head
+
+      - name: Tests
+        run: pytest tests -q
