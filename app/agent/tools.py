@@ -1,11 +1,13 @@
 """The agent's tools.
 
-Each tool carries two things the runtime needs and the prompt cannot be
+Each tool carries three things the runtime needs and the prompt cannot be
 trusted to supply:
 
 * a **Pydantic schema**, validated before the tool body runs;
-* a **handler** that is a plain coroutine, so retries and timeouts can wrap
-  it uniformly.
+* an **ActionRisk**, which decides whether the executor may run it freely or
+  must park it for user confirmation;
+* a **handler** that is a plain coroutine, so retries, timeouts and tracing
+  wrap it uniformly in :mod:`app.agent.executor`.
 
 Tool results are structured plain text rather than JSON. The model reads them
 directly, and short labelled lines cost fewer tokens than nested objects while
@@ -29,6 +31,7 @@ from app.agent.schemas import (
     ListRoomsInput,
     PlaceHoldInput,
 )
+from app.domain.enums import ActionRisk
 from app.domain.reservation import Reservation
 from app.domain.time_range import TimeRange
 from app.services.booking_saga import BookingSaga
@@ -40,6 +43,8 @@ class ToolSpec:
     name: str
     description: str
     schema: type[BaseModel]
+    risk: ActionRisk
+    #: Rendered into the confirmation prompt for high-risk tools.
     summarize: Any = None
 
 
@@ -239,6 +244,7 @@ TOOLS: dict[str, ToolSpec] = {
         name="list_rooms",
         description="List every meeting room in the organization with capacity.",
         schema=ListRoomsInput,
+        risk=ActionRisk.READ,
     ),
     "list_my_bookings": ToolSpec(
         name="list_my_bookings",
@@ -247,6 +253,7 @@ TOOLS: dict[str, ToolSpec] = {
             "references. Call this before cancelling anything."
         ),
         schema=ListMyBookingsInput,
+        risk=ActionRisk.READ,
     ),
     "list_available_rooms": ToolSpec(
         name="list_available_rooms",
@@ -255,6 +262,7 @@ TOOLS: dict[str, ToolSpec] = {
             "attendees. Use when the user has not chosen a room."
         ),
         schema=ListAvailableRoomsInput,
+        risk=ActionRisk.READ,
     ),
     "get_room_schedule": ToolSpec(
         name="get_room_schedule",
@@ -263,6 +271,7 @@ TOOLS: dict[str, ToolSpec] = {
             "the user asks what a specific room looks like."
         ),
         schema=GetRoomScheduleInput,
+        risk=ActionRisk.READ,
     ),
     "place_hold": ToolSpec(
         name="place_hold",
@@ -272,6 +281,7 @@ TOOLS: dict[str, ToolSpec] = {
             "named a room and a time, before asking them to confirm."
         ),
         schema=PlaceHoldInput,
+        risk=ActionRisk.HOLD,
     ),
     "confirm_booking": ToolSpec(
         name="confirm_booking",
@@ -280,12 +290,14 @@ TOOLS: dict[str, ToolSpec] = {
             "calendar. Irreversible from the user's point of view."
         ),
         schema=ConfirmBookingInput,
+        risk=ActionRisk.HIGH,
         summarize=_summarize_confirm,
     ),
     "cancel_booking": ToolSpec(
         name="cancel_booking",
         description="Cancel one of the caller's own bookings by reference.",
         schema=CancelBookingInput,
+        risk=ActionRisk.HIGH,
         summarize=_summarize_cancel,
     ),
 }
@@ -326,6 +338,7 @@ def summarize(tool_name: str, args: BaseModel) -> str:
 __all__ = [
     "HANDLERS",
     "TOOLS",
+    "ActionRisk",
     "AgentContext",
     "ToolSpec",
     "err",
