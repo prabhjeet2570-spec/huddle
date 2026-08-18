@@ -11,6 +11,7 @@ from fastapi.responses import JSONResponse
 
 from app.api.routes.auth import router as auth_router
 from app.api.routes.bookings import router as bookings_router
+from app.api.routes.chat import router as chat_router
 from app.config import settings
 from app.domain.exceptions import DomainError, GuardrailError
 from app.infrastructure.database import dispose_engine
@@ -31,6 +32,12 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     if settings.seed_on_startup:
         await seed()
 
+    if settings.llm_provider != "fake" and not settings.llm_api_key.get_secret_value():
+        # Said once, loudly, at boot rather than only on the first chat request.
+        logger.warning(
+            "No HUDDLE_LLM_API_KEY set: /chat is disabled. The REST API, "
+            "booking rules and metrics all work without one."
+        )
     # The sweeper is what makes hold TTLs visible in availability queries.
     await sweeper.start()
     try:
@@ -52,6 +59,7 @@ app = FastAPI(
 
 app.include_router(auth_router)
 app.include_router(bookings_router)
+app.include_router(chat_router)
 
 
 @app.exception_handler(GuardrailError)
@@ -62,3 +70,12 @@ async def guardrail_handler(_request: Request, error: GuardrailError) -> JSONRes
 @app.exception_handler(DomainError)
 async def domain_handler(_request: Request, error: DomainError) -> JSONResponse:
     return JSONResponse(status_code=409, content={"detail": str(error)})
+
+
+if settings.otel_enabled:
+    try:
+        from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+
+        FastAPIInstrumentor.instrument_app(app)
+    except Exception:
+        logger.exception("FastAPI OTel instrumentation unavailable")
