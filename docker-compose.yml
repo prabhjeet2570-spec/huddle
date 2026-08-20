@@ -17,6 +17,15 @@ services:
       timeout: 3s
       retries: 30
 
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.115.1
+    command: ["--config=/etc/otel/config.yaml"]
+    volumes:
+      - ./ops/otel-collector.yaml:/etc/otel/config.yaml:ro
+    ports:
+      - "4318:4318"
+    profiles: ["observability"]
+
   api:
     build: .
     depends_on:
@@ -29,6 +38,8 @@ services:
       HUDDLE_LLM_PROVIDER: ${HUDDLE_LLM_PROVIDER:-openai}
       HUDDLE_SEED_ON_STARTUP: "true"
       HUDDLE_SEED_USER_PASSWORD: ${HUDDLE_SEED_USER_PASSWORD:-huddle-dev-password}
+      HUDDLE_OTEL_ENABLED: ${HUDDLE_OTEL_ENABLED:-false}
+      HUDDLE_OTEL_ENDPOINT: http://otel-collector:4318
     ports:
       - "8000:8000"
 
