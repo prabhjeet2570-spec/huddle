@@ -1,4 +1,4 @@
-"""HTTP surface: auth, tenancy and the booking endpoints."""
+"""HTTP surface: auth, tenancy, the booking endpoints and the chat endpoint."""
 
 from __future__ import annotations
 
@@ -79,7 +79,7 @@ async def test_bad_credentials_are_rejected_identically(client, tenant, payload)
 
 
 @pytest.mark.parametrize(
-    "path", ["/auth/me", "/bookings/me", "/bookings/rooms"]
+    "path", ["/auth/me", "/bookings/me", "/bookings/rooms", "/metrics"]
 )
 async def test_protected_endpoints_reject_anonymous_callers(client, tenant, path):
     assert (await client.get(path)).status_code == 401
@@ -241,3 +241,72 @@ async def test_a_user_cannot_cancel_a_colleagues_booking(client, tenant):
     assert (
         await client.delete(f"/bookings/{reference}", headers=_auth(bob))
     ).status_code == 409
+
+
+# --- Chat ------------------------------------------------------------------
+
+
+async def test_the_chat_endpoint_returns_a_conversation_id(client, tenant, monkeypatch):
+    from langchain_core.messages import AIMessage
+
+    from app.agent import runner as runner_module
+    from app.agent.llm import FakeChatModel
+
+    original = runner_module.ConversationRunner.__init__
+
+    def patched(self, session, *, model=None, clock=None):
+        original(
+            self,
+            session,
+            model=FakeChatModel([AIMessage(content="Rooms A through E.")]),
+            clock=clock,
+        )
+
+    monkeypatch.setattr(runner_module.ConversationRunner, "__init__", patched)
+
+    token = await _login(client)
+    response = await client.post(
+        "/chat", json={"message": "what rooms are there?"}, headers=_auth(token)
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["response"] == "Rooms A through E."
+    assert body["conversation_id"]
+    assert body["status"] == "completed"
+
+
+async def test_chat_rejects_an_empty_message(client, tenant):
+    token = await _login(client)
+    response = await client.post("/chat", json={"message": ""}, headers=_auth(token))
+    assert response.status_code == 422
+
+
+# --- Ops -------------------------------------------------------------------
+
+
+async def test_metrics_are_served_and_shaped(client, tenant):
+    token = await _login(client)
+    response = await client.get("/metrics", headers=_auth(token))
+
+    assert response.status_code == 200
+    names = {metric["name"] for metric in response.json()["metrics"]}
+    assert {
+        "task_completion_rate",
+        "escalation_rate",
+        "wrong_tool_call_rate",
+        "compensation_frequency",
+        "turn_latency_p50_ms",
+        "turn_latency_p95_ms",
+        "tool_calls_per_confirmed_booking",
+    } <= names
+    # Every metric states how it is computed.
+    assert all(metric["definition"] for metric in response.json()["metrics"])
+
+
+async def test_the_alert_queue_is_admin_only(client, tenant):
+    admin = await _login(client, "acme", "alice")
+    member = await _login(client, "acme", "bob")
+
+    assert (await client.get("/alerts", headers=_auth(admin))).status_code == 200
+    assert (await client.get("/alerts", headers=_auth(member))).status_code == 403

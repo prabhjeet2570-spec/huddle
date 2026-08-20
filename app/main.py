@@ -12,6 +12,7 @@ from fastapi.responses import JSONResponse
 from app.api.routes.auth import router as auth_router
 from app.api.routes.bookings import router as bookings_router
 from app.api.routes.chat import router as chat_router
+from app.api.routes.ops import router as ops_router
 from app.config import settings
 from app.domain.exceptions import DomainError, GuardrailError
 from app.infrastructure.database import dispose_engine
@@ -57,6 +58,7 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+app.include_router(ops_router)
 app.include_router(auth_router)
 app.include_router(bookings_router)
 app.include_router(chat_router)
