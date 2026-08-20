@@ -9,6 +9,9 @@ on:
 env:
   HUDDLE_DATABASE_URL: postgresql+asyncpg://huddle:huddle@localhost:5432/huddle
   HUDDLE_JWT_SECRET: ci-only-secret-not-used-anywhere-real
+  HUDDLE_LLM_PROVIDER: fake
+  HUDDLE_FAILURE_INJECTION_ENABLED: "true"
+  HUDDLE_HOLD_SWEEPER_ENABLED: "false"
 
 jobs:
   lint:
@@ -20,7 +23,9 @@ jobs:
           python-version: "3.12"
       - run: pip install ruff==0.14.14
       - name: Lint
-        run: ruff check app tests
+        run: ruff check app tests scripts
+      - name: Format check
+        run: ruff format --check app tests scripts
 
   test:
     runs-on: ubuntu-latest
@@ -52,5 +57,49 @@ jobs:
       - name: Apply migrations
         run: alembic upgrade head
 
-      - name: Tests
-        run: pytest tests -q
+      # Split out so a regression in the safety properties is obvious in the
+      # job list rather than buried in a single 200-test run.
+      - name: Unit and integration tests
+        run: pytest tests -q --ignore=tests/concurrency --ignore=tests/failure_injection
+
+      - name: Concurrency suite (no double booking)
+        run: pytest tests/concurrency -q -s
+
+      - name: Failure-injection suite (no state corruption)
+        run: pytest tests/failure_injection -q -s
+
+      - name: Concurrency benchmark
+        run: python -m scripts.benchmark_concurrency --attempts 50
+
+      - name: Regenerate measured metrics
+        run: |
+          python -m scripts.simulate --sessions 30 --keep
+          python -m scripts.report_metrics
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build image
+        run: docker build -t huddle:ci .
+      - name: Boot the stack and check health
+        run: |
+          docker compose up -d db
+          for _ in $(seq 1 60); do
+            docker compose exec -T db pg_isready -U huddle -d huddle && break
+            sleep 2
+          done
+          docker compose up -d api
+          for _ in $(seq 1 60); do
+            if curl -fsS http://localhost:8000/health; then
+              echo "api healthy"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "api never became healthy"
+          docker compose logs api
+          exit 1
+      - name: Tear down
+        if: always()
+        run: docker compose down -v
