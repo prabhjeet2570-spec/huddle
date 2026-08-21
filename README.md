@@ -1,8 +1,6 @@
 # Huddle
 
-A conversational meeting-room booking agent, built around the reliability
-engineering an LLM needs before it is allowed to write to shared, contended
-state.
+An LLM agent that books meeting rooms over an HTTP API.
 
 Booking a room is an irreversible write to a resource other people are
 competing for, performed by a model that can hallucinate a room, loop without

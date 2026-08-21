@@ -51,10 +51,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 app = FastAPI(
     title="Huddle",
     version="1.0.0",
-    description=(
-        "A conversational meeting-room booking agent with the reliability "
-        "engineering that makes autonomous writes to contended state safe."
-    ),
+    description="An LLM agent that books meeting rooms over an HTTP API.",
     lifespan=lifespan,
 )
 
