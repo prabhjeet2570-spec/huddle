@@ -6,7 +6,11 @@ checkpoints and prevents overlapping bookings; a separate worker synchronizes a
 simulated calendar. Rooms and users are fictional. There is no NYU integration,
 scraping, or public deployment requirement.
 
-![Huddle room discovery](docs/screenshots/rooms.jpg)
+![Huddle room directory with compact listings and top navigation](docs/screenshots/rooms.jpg)
+
+The room directory puts date, time, group size, and floor selection above compact
+illustrated listings. Top navigation keeps rooms, reservations, and activity
+within reach; the booking assistant opens alongside the current task.
 
 ## What you can do
 
@@ -237,7 +241,7 @@ view; they include successful and failed update states rather than only empty pa
 </details>
 <details><summary>Assistant confirms the booked room</summary>
 
-![Confirmed Room 306 booking](docs/screenshots/chat-confirmed.jpg)
+![Assistant confirms the approved room booking](docs/screenshots/chat-confirmed.jpg)
 
 ![Conflicting reservation with alternatives](docs/screenshots/chat-conflict.jpg)
 

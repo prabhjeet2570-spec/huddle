@@ -1,8 +1,9 @@
 # Interface decisions
 
 The room directory starts with date, time, group size, and a floor filter. Room
-numbers identify spaces across four floors. A warm neutral palette, muted green
-controls, and a simple serif page title give the interface a quieter character.
+numbers identify spaces across four floors. Warm paper backgrounds, rust-colored controls, and compact illustrated room
+listings give the directory its own character. A horizontal navigation bar replaces
+the dashboard sidebar; clear sans-serif headings keep the booking form practical.
 Local room illustrations describe fictional spaces rather than claim photographs
 of a real library.
 
@@ -34,4 +35,4 @@ Floor filters also update the count of available rooms.
 
 Discovery and the chat drawer were checked at 390px with no horizontal overflow.
 Desktop discovery, approval, booking tabs and profile switching were checked at
-1280px. Screenshots show the running application and synthetic sample data.
+1440px. Screenshots show the running application and synthetic sample data.
